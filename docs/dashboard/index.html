@@ -10,7 +10,7 @@
   --color-ok: #1f7a4d; --color-bad: #b3402a; --cds-chart-grid: #e8e7e1; --cds-chart-axis: #b9b8b0;
   --cds-surface-popover: #ffffff; --cds-border: #d6d5cd; --cds-shadow-popover: 0 4px 14px rgba(0,0,0,.12); --cds-text-secondary: #6b6a63;
   --c0: #3b6ea8; --c1: #d9822b; --c2: #3f9275; --c3: #8a5fb0; --c4: #b5524a; --c5: #8a8a82;
-  --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 22px; --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-lg: 18px; --cds-radius: 10px;
+  --color-bg: var(--bg); --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 22px; --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-lg: 18px; --cds-radius: 10px;
   --cds-font-size-title: 30px; --cds-font-size-heading: 16px; --cds-font-size-caption: 13px; --cds-font-size-body: 15px; --cds-font-weight-medium: 600; --dash-gutter: clamp(12px, 3vw, 28px); }
 @media (prefers-color-scheme: dark) { :root { --bg: #161614; --color-panel: #1f1f1c; --color-border-line: #33332e; --color-fg: #ecebe6; --color-fg-muted: #a3a29a;
   --color-ok: #5fcf9a; --color-bad: #f08a72; --cds-chart-grid: #2d2d29; --cds-chart-axis: #55554f; --cds-surface-popover: #26261f; --cds-border: #45453d; --cds-text-secondary: #a3a29a;
@@ -66,6 +66,26 @@ a { color: inherit; }
 .ttc ul.ev { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 8px; line-height: 1.5; max-width: 95ch; }
 .ttc td.wrap { white-space: normal; min-width: 14rem; color: var(--color-fg-muted); }
 .ttc .pass { color: var(--color-ok); } .ttc .fail { color: var(--color-bad); font-weight: 600; }
+.ttc .hero { padding: 18px 0 4px; }
+.ttc .hero .kick { font-size: var(--cds-font-size-caption); letter-spacing: .06em; text-transform: uppercase; color: var(--color-fg-muted); margin-bottom: 8px; }
+.ttc .hero h1 { font-size: clamp(30px, 5.4vw, 52px); line-height: 1.08; max-width: 20ch; }
+.ttc .hero .herosub { font-size: 1.12em; line-height: 1.5; max-width: 58ch; color: var(--color-fg-muted); margin: 14px 0 8px; }
+.ttc .prog { position: sticky; top: 0; height: 4px; z-index: 7; margin-bottom: calc(-1 * var(--cds-gap-lg)); }
+.ttc .chapnav { position: sticky; top: 4px; z-index: 6; display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; background: var(--color-bg, var(--bg)); border-bottom: 1px solid var(--color-border-line); }
+.ttc .chapnav a { text-decoration: none; color: var(--color-fg-muted); border: 1px solid var(--color-border-line); border-radius: 999px; padding: 3px 12px; font-size: var(--cds-font-size-caption); white-space: nowrap; }
+.ttc .chapnav a.on { background: var(--color-fg); color: var(--color-panel); border-color: var(--color-fg); }
+.ttc .chap { padding-top: 30px; scroll-margin-top: 64px; }
+.ttc .chap .ck { font-size: var(--cds-font-size-caption); letter-spacing: .06em; text-transform: uppercase; color: var(--color-fg-muted); }
+.ttc .chap .cq { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: clamp(24px, 3.8vw, 34px); line-height: 1.15; margin: 4px 0 8px; }
+.ttc .chap .ca { margin: 0; max-width: 68ch; line-height: 1.5; font-size: 1.06em; }
+.ttc a.nxt { align-self: flex-start; color: var(--color-fg); text-decoration: none; border-bottom: 1px solid var(--color-fg-muted); font-size: var(--cds-font-size-caption); padding-bottom: 1px; }
+.ttc input.srch { width: 100%; max-width: 30rem; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--color-border-line); border-radius: 8px; background: var(--color-bg, var(--bg)); color: var(--color-fg); font: inherit; }
+.ttc .fres { margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 10px; }
+.ttc .fres .cell { border: 1px solid var(--color-border-line); border-radius: 8px; padding: 10px 12px; }
+.ttc .fres .cell .lab { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ttc .fres .cell .big { font-family: var(--font-anthropic-serif); font-size: 26px; font-variant-numeric: tabular-nums; }
+.ttc .reveal { margin: 12px 0 0; line-height: 1.5; max-width: 80ch; }
+@media (prefers-reduced-motion: reduce) { .ttc * { scroll-behavior: auto !important; } }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
 </style>
@@ -73,10 +93,14 @@ a { color: inherit; }
 
 
 <div class="ttc">
-  <header>
-    <h1>TTC subway service delays</h1>
-    <p class="sub">Executive view &middot; data through <span data-draw="asof" data-source="kpi">—</span> &middot; City of Toronto Open Data, TTC Subway Delay Data &middot; refreshed <span data-generated>—</span> &middot; independent analysis, not an official TTC report &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
+  <header class="hero">
+    <div class="kick">TTC subway delays, January 2014 to today</div>
+    <h1 data-draw="hero_h" data-source="monthly">—</h1>
+    <p class="herosub" data-draw="hero_p" data-source="monthly heat">—</p>
+    <p class="sub">Data through <span data-draw="asof" data-source="kpi">—</span> &middot; City of Toronto Open Data, TTC Subway Delay Data &middot; refreshed <span data-generated>—</span> &middot; independent analysis, not an official TTC report &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
   </header>
+  <div class="prog" data-draw="progress" data-source="kpi"></div>
+  <nav class="chapnav" data-draw="chapnav" data-source="kpi" aria-label="Chapters"></nav>
 
   <section class="card start" aria-label="How to read this page">
     <h2>Start here: what a "delay" is in this data</h2>
@@ -88,6 +112,7 @@ a { color: inherit; }
     </div>
   </section>
 
+  <div class="chap" id="ch-1"><div class="ck">Chapter 1 of 7</div><h2 class="cq">How big is the problem?</h2><p class="ca" data-draw="ans_1" data-source="monthly">—</p></div>
   <section class="card brief" aria-label="Summary">
     <h2>What the data says</h2>
     <ul data-draw="brief" data-source="monthly yearly line_ltm causes_ltm watch">—</ul>
@@ -95,7 +120,9 @@ a { color: inherit; }
 
   <section class="tiles" aria-label="Key indicators" data-draw="tiles" data-source="monthly buckets">—</section>
 
-  <div class="sect">Trend</div>
+  <a class="nxt" href="#ch-2" data-go="ch-2">Next: is it getting worse? &darr;</a>
+
+  <div class="chap" id="ch-2"><div class="ck">Chapter 2 of 7</div><h2 class="cq">Is it getting worse?</h2><p class="ca" data-draw="ans_2" data-source="yearly">—</p></div>
   <section class="card">
     <h2>Minutes of delay per month</h2>
     <p class="note">Bars are monthly totals; the line is the trailing 12-month average. Shaded band marks March 2020 to December 2021, when service and ridership were far below normal.</p>
@@ -117,56 +144,15 @@ a { color: inherit; }
     </div>
   </section>
 
-  <div class="sect">Where</div>
-  <section class="grid">
-    <div class="card">
-      <h2>By line, last 12 months</h2>
-      <p class="note">Minutes of delay against the 12 months before. Other covers Line 3 (closed July 2023) and incidents tagged to both lines or to no line.</p>
-      <div class="tbl"><table><thead><tr><th>Line</th><th class="n">Minutes</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">vs prior</th></tr></thead><tbody data-draw="line_body" data-source="line_ltm"></tbody></table></div>
-    </div>
-    <div class="card">
-      <h2>Minutes of delay by line, per year</h2>
-      <p class="note">Line 3 (SRT) closed in July 2023, so its delays stop there.</p>
-      <div class="keys" id="lkey"></div>
-      <div class="chart short" data-draw="lineyear" data-source="line_year">—</div>
-    </div>
-  </section>
+  <a class="nxt" href="#ch-3" data-go="ch-3">Next: when do delays happen? &darr;</a>
 
+  <div class="chap" id="ch-3"><div class="ck">Chapter 3 of 7</div><h2 class="cq">When do delays happen?</h2><p class="ca" data-draw="ans_3" data-source="heat">—</p></div>
   <section class="card">
-    <h2>Station watchlist, last 12 months</h2>
-    <p class="note">The 15 stations with the most delay minutes, against the 12 months before. Large swings can come from one or two long incidents, so read minutes per incident alongside the change.</p>
-    <div class="tbl"><table><thead><tr><th>Station</th><th>Minutes lost</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">Min / incident</th></tr></thead><tbody data-draw="watch_body" data-source="watch"></tbody></table></div>
+    <h2>Quick test: which hour of the week costs the most delay minutes?</h2>
+    <p class="note">Pick one, then see every hour of the week on the map below.</p>
+    <div data-draw="guess" data-source="heat">—</div>
   </section>
 
-  <div class="sect">Why</div>
-  <section class="grid">
-    <div class="card">
-      <h2>What kind of problem, per year</h2>
-      <p class="note">Minutes of delay by cause group. Groups are built by matching words in the City's own cause descriptions, so treat them as a guide, not an official TTC classification.</p>
-      <div class="keys" id="gkey"></div>
-      <div class="chart short" data-draw="groups" data-source="group_year">—</div>
-    </div>
-    <div class="card">
-      <h2>Cause groups, last 12 months</h2>
-      <div class="tbl"><table><thead><tr><th>Group</th><th class="n">Minutes</th><th class="n">Share</th><th class="n">vs prior</th><th class="n">Incidents</th></tr></thead><tbody data-draw="group_body" data-source="group_ltm"></tbody></table></div>
-    </div>
-  </section>
-
-  <section class="grid">
-    <div class="card">
-      <h2>Top causes, last 12 months</h2>
-      <p class="note">Delay codes as published, ranked by minutes lost.</p>
-      <div class="tbl"><table><thead><tr><th>Cause</th><th class="n">Minutes</th><th class="n">vs prior</th><th class="n">Incidents</th></tr></thead><tbody data-draw="cause_body" data-source="causes_ltm"></tbody></table></div>
-    </div>
-  </section>
-
-  <section class="card">
-    <h2>Largest causes over time</h2>
-      <p class="note">Minutes per year for the six causes with the most minutes overall. Darker cells are that cause's worst years.</p>
-      <div class="tbl"><table data-draw="cause_matrix" data-source="cause_year"></table></div>
-  </section>
-
-  <div class="sect">When</div>
   <section class="card">
     <h2>Delays by day of week and hour</h2>
     <p class="note">Every delay since 2014, grouped by the day of the week and the hour it was logged. Switch between how many incidents there were, how many minutes they cost and how long the average one lasted. Sunday at 08:00 stands out in every year of the data; Sunday subway service begins around then, and the data does not say why that hour logs so many incidents.</p>
@@ -191,7 +177,66 @@ a { color: inherit; }
     <div class="chart short" data-draw="hourly" data-source="hourly_sum">—</div>
   </section>
 
-  <div class="sect">Where decisions could focus</div>
+  <a class="nxt" href="#ch-4" data-go="ch-4">Next: where do they happen? &darr;</a>
+
+  <div class="chap" id="ch-4"><div class="ck">Chapter 4 of 7</div><h2 class="cq">Where do delays happen?</h2><p class="ca" data-draw="ans_4" data-source="line_ltm watch monthly">—</p></div>
+  <section class="card">
+    <h2>Find your station</h2>
+    <p class="note">Type a station to see how it ranks among all stations for delay minutes since 2014. Names are as logged by the City, so a station can appear under a few spellings; the main one is listed first.</p>
+    <div data-draw="finder" data-source="stations_all">—</div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>By line, last 12 months</h2>
+      <p class="note">Minutes of delay against the 12 months before. Other covers Line 3 (closed July 2023) and incidents tagged to both lines or to no line.</p>
+      <div class="tbl"><table><thead><tr><th>Line</th><th class="n">Minutes</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">vs prior</th></tr></thead><tbody data-draw="line_body" data-source="line_ltm"></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Minutes of delay by line, per year</h2>
+      <p class="note">Line 3 (SRT) closed in July 2023, so its delays stop there.</p>
+      <div class="chart short" data-draw="lineyear" data-source="line_year">—</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Station watchlist, last 12 months</h2>
+    <p class="note">The 15 stations with the most delay minutes, against the 12 months before. Large swings can come from one or two long incidents, so read minutes per incident alongside the change.</p>
+    <div class="tbl"><table><thead><tr><th>Station</th><th>Minutes lost</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">Min / incident</th></tr></thead><tbody data-draw="watch_body" data-source="watch"></tbody></table></div>
+  </section>
+
+  <a class="nxt" href="#ch-5" data-go="ch-5">Next: why do they happen? &darr;</a>
+
+  <div class="chap" id="ch-5"><div class="ck">Chapter 5 of 7</div><h2 class="cq">Why do delays happen?</h2><p class="ca" data-draw="ans_5" data-source="group_ltm">—</p></div>
+  <section class="grid">
+    <div class="card">
+      <h2>What kind of problem, per year</h2>
+      <p class="note">Minutes of delay by cause group. Groups are built by matching words in the City's own cause descriptions, so treat them as a guide, not an official TTC classification.</p>
+      <div class="chart short" data-draw="groups" data-source="group_year">—</div>
+    </div>
+    <div class="card">
+      <h2>Cause groups, last 12 months</h2>
+      <div class="tbl"><table><thead><tr><th>Group</th><th class="n">Minutes</th><th class="n">Share</th><th class="n">vs prior</th><th class="n">Incidents</th></tr></thead><tbody data-draw="group_body" data-source="group_ltm"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>Top causes, last 12 months</h2>
+      <p class="note">Delay codes as published, ranked by minutes lost.</p>
+      <div class="tbl"><table><thead><tr><th>Cause</th><th class="n">Minutes</th><th class="n">vs prior</th><th class="n">Incidents</th></tr></thead><tbody data-draw="cause_body" data-source="causes_ltm"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Largest causes over time</h2>
+      <p class="note">Minutes per year for the six causes with the most minutes overall. Darker cells are that cause's worst years.</p>
+      <div class="tbl"><table data-draw="cause_matrix" data-source="cause_year"></table></div>
+  </section>
+
+  <a class="nxt" href="#ch-6" data-go="ch-6">Next: what could change it? &darr;</a>
+
+  <div class="chap" id="ch-6"><div class="ck">Chapter 6 of 7</div><h2 class="cq">What could change it, and who decides?</h2><p class="ca" data-draw="ans_6" data-source="group_ltm">—</p></div>
   <section class="card">
     <h2>What this suggests, and who can act on it</h2>
     <p class="say">The people who can change these numbers are the people who run and fund the subway: TTC management, its Board and the City of Toronto. They have the operating detail this public data lacks. The data shows where and when time is lost and what kind of problem it was. It cannot show which fix would work or what it would cost, so the options below are questions to evaluate, not recommendations.</p>
@@ -209,6 +254,9 @@ a { color: inherit; }
     <ul class="ev" data-draw="riders" data-source="heat daily"></ul>
   </section>
 
+  <a class="nxt" href="#ch-7" data-go="ch-7">Next: can you trust these numbers? &darr;</a>
+
+  <div class="chap" id="ch-7"><div class="ck">Chapter 7 of 7</div><h2 class="cq">Can you trust these numbers?</h2><p class="ca" data-draw="ans_7" data-source="kpi yearly monthly daily heat buckets group_year lines no_time">—</p></div>
   <section class="card">
     <h2>Data quality and sources</h2>
     <p class="note">Every build of the pipeline runs these checks and loads each source file once; a file whose last-modified time is unchanged is skipped.</p>
@@ -227,6 +275,12 @@ a { color: inherit; }
   <section class="card">
     <h2>Next: connecting delays to ridership and to buses and streetcars</h2>
     <p class="note" style="margin:0">Minutes here are not adjusted for how many people ride. The TTC publishes annual boardings by mode and weekday boardings by line on its operating statistics pages, and the City's open data portal carries bus and streetcar delay data in a similar format. The plan is to add both, so delay can be read per rider and across modes.</p>
+  </section>
+
+  <section class="card">
+    <h2>The whole picture in three lines</h2>
+    <ul class="ev" data-draw="closing" data-source="monthly group_ltm heat"></ul>
+    <p class="note" style="margin:10px 0 0">What should come next: bus and streetcar delays, or ridership? The code and the data pipeline are open: <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">github.com/amirpatel32003/ttc-delay-pipeline</a></p>
   </section>
 
   <details>
@@ -486,8 +540,9 @@ const dash = (() => {
       const pts = r.filter((d) => d.line === n).sort((a, b) => a.yr - b.yr);
       svgEl('path', { d: d3.line().x((d) => x(d.yr)).y((d) => yy(d.total_delay_min))(pts), fill: 'none', stroke: dash.colors[i], 'stroke-width': 2 }, svg);
     });
-    const key = document.getElementById('lkey');
-    if (key) key.replaceChildren(...names.map((n, i) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = dash.colors[i]; k.append(s, LINE[n]); return k; }));
+    const key = el$('div', 'keys');
+    key.append(...names.map((n, i) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = dash.colors[i]; k.append(s, LINE[n]); return k; }));
+    el.insertBefore(key, el.firstChild);
     const tip = tooltip(el);
     const over = svgEl('rect', { x: mg.l, y: mg.t, width: W - mg.l - mg.r, height: H - mg.b - mg.t, fill: 'transparent' }, svg);
     over.addEventListener('pointermove', (ev) => {
@@ -517,6 +572,7 @@ const dash = (() => {
     h.forEach((d) => { if (d.hour_of_day % 3 === 0) svgEl('text', { x: x(d.hour_of_day) + x.bandwidth() / 2, y: H - 8, 'text-anchor': 'middle' }, svg).textContent = d3.format('02')(d.hour_of_day); });
   });
 
+  const dailyRows = () => { const r = rows('daily'); return r ? r.map((x) => (Array.isArray(x) ? x : [x.d, x.n, x.m])) : r; };
   const scalar = (id) => { const r = rows(id); if (r == null) return null; if (typeof r === 'number') return r; return r[0] ? r[0].value : null; };
   const GROUPS = ['Customer, safety and security', 'Operations and staffing', 'Track, signals and power', 'Trains and doors', 'Weather', 'Other and unclassified'];
   const gcol = (g) => (g === 'Other and unclassified' ? 'var(--color-fg-muted)' : dash.colors[GROUPS.indexOf(g)]);
@@ -567,7 +623,7 @@ const dash = (() => {
   // ---------- calendar by date
   let calYear = null;
   dash.draw('calendar', (el) => {
-    const dly = rows('daily'); if (!dly || !dly.length) { dashT(el); return; }
+    const dly = dailyRows(); if (!dly || !dly.length) { dashT(el); return; }
     const days = dly.map(([d, n, m]) => ({ d, n, m, date: new Date(d + 'T00:00:00Z') }));
     const years = [...new Set(days.map((x) => x.date.getUTCFullYear()))];
     if (calYear == null || !years.includes(calYear)) calYear = years[years.length - 1];
@@ -639,8 +695,9 @@ const dash = (() => {
       hit.addEventListener('pointermove', (ev) => { const eb = el.getBoundingClientRect(); tip.show(String(y) + (y === years[years.length - 1] ? ' (to Sep)' : ''), GROUPS.map((gn) => { const d = r.find((q) => q.yr === y && q.grp === gn); return gn + ': ' + fmt(d ? d.minutes : 0); }), ev.clientX - eb.left, ev.clientY - eb.top); });
       hit.addEventListener('pointerleave', () => tip.hide());
     });
-    const key = document.getElementById('gkey');
-    if (key) key.replaceChildren(...GROUPS.map((gn) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = gcol(gn); k.append(s, gn); return k; }));
+    const key = el$('div', 'keys');
+    key.append(...GROUPS.map((gn) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = gcol(gn); k.append(s, gn); return k; }));
+    el.insertBefore(key, el.firstChild);
   });
   body('group_body', 'group_ltm', (r) => { const tot = d3.sum(r, (d) => d.cur_min); return r.map((d) => [[d.grp], [fmt(d.cur_min), 'n'], [Math.round(100 * d.cur_min / tot) + '%', 'n'], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n']]); });
   body('levers_body', 'group_ltm', (r) => { const tot = d3.sum(r, (d) => d.cur_min); return r.map((d) => [[d.grp], [fmt(d.cur_min), 'n'], [Math.round(100 * d.cur_min / tot) + '%', 'n'], [LEVERS[d.grp] || '', 'wrap']]); });
@@ -665,7 +722,7 @@ const dash = (() => {
   });
 
   dash.draw('riders', (ul) => {
-    const h = rows('heat'), dly = rows('daily'); if (!h || !h.length || !dly || !dly.length) { ul.replaceChildren(el$('li', null, '—')); return; }
+    const h = rows('heat'), dly = dailyRows(); if (!h || !h.length || !dly || !dly.length) { ul.replaceChildren(el$('li', null, '—')); return; }
     const li = (...p) => { const l = el$('li'); p.forEach((q) => l.append(typeof q === 'string' ? document.createTextNode(q) : q)); return l; };
     const B = (t) => el$('b', null, t);
     const wk = h.filter((d) => !['SATURDAY', 'SUNDAY'].includes(d.day_name));
@@ -686,11 +743,11 @@ const dash = (() => {
   });
 
   // ---------- numbers check
-  dash.draw('audit_body', (tb) => {
-    const k = rows('kpi'), y = rows('yearly'), m = rows('monthly'), dly = rows('daily'), h = rows('heat'), b = rows('buckets'), g = rows('group_year'), l = rows('lines'), nt = scalar('no_time');
-    if (![k, y, m, dly, h, b, g, l].every((x) => x && x.length) || nt == null) { return; }
+  function auditChecks() {
+    const k = rows('kpi'), y = rows('yearly'), m = rows('monthly'), dly = dailyRows(), h = rows('heat'), b = rows('buckets'), g = rows('group_year'), l = rows('lines'), nt = scalar('no_time');
+    if (![k, y, m, dly, h, b, g, l].every((x) => x && x.length) || nt == null) return null;
     const K = k[0], S = (a, f) => d3.sum(a, f);
-    const checks = [
+    return [
       ['Incidents: sum of years', K.incidents, S(y, (d) => d.incidents)],
       ['Minutes: sum of years', K.total_delay_min, S(y, (d) => d.total_delay_min)],
       ['Incidents: sum of months', K.incidents, S(m, (d) => d.incidents)],
@@ -704,10 +761,128 @@ const dash = (() => {
       ['Minutes: lines', K.total_delay_min, S(l, (d) => d.total_delay_min)],
       ['Source rows: kept plus duplicates removed plus rejected', K.source_rows, K.incidents + (K.source_rows - K.incidents - K.rejects) + K.rejects]
     ];
+  }
+  dash.draw('audit_body', (tb) => {
+    const checks = auditChecks(); if (!checks) return;
+    const K = rows('kpi')[0];
     const rowsOut = checks.map(([n, a, f]) => { const ok = a === f; const tr = el$('tr'); tr.append(el$('td', null, n), el$('td', 'n', fmt(a)), el$('td', 'n', fmt(f)), el$('td', ok ? 'pass' : 'fail', ok ? 'match' : 'MISMATCH')); return tr; });
     const dup = K.source_rows - K.incidents - K.rejects;
     const note = el$('tr'); const c = el$('td', null, 'The City published ' + fmt(K.source_rows) + ' rows; ' + fmt(K.incidents) + ' are kept, ' + fmt(dup) + ' exact duplicates were removed and ' + fmt(K.rejects) + ' were rejected.'); c.colSpan = 4; c.style.color = 'var(--color-fg-muted)'; note.append(c);
     tb.replaceChildren(...rowsOut, note);
+  });
+
+  // ---------- story: hero, chapters, progress
+  const reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  const CHAPS = [['ch-1', 'Size'], ['ch-2', 'Trend'], ['ch-3', 'When'], ['ch-4', 'Where'], ['ch-5', 'Why'], ['ch-6', 'Options'], ['ch-7', 'Numbers']];
+  let heroDone = false, navBound = false, navCurrent = 'ch-1';
+  const markNav = () => document.querySelectorAll('.ttc .chapnav a').forEach((a) => a.classList.toggle('on', a.getAttribute('data-go') === navCurrent));
+
+  dash.draw('hero_h', (el) => {
+    const m = rows('monthly'); if (!m || m.length < 24) { dashT(el); return; }
+    const w = windows(m), txt = (v) => 'The TTC subway lost ' + fmt(Math.round(v)) + ' minutes to delays in the last 12 months.';
+    el.textContent = txt(w.minL);
+    if (!heroDone && !reduced) {
+      heroDone = true; const t0 = performance.now();
+      const step = (t) => { const k = Math.min(1, (t - t0) / 1200); el.textContent = txt(w.minL * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(step); };
+      requestAnimationFrame(step);
+    }
+  });
+  dash.draw('hero_p', (el) => {
+    const m = rows('monthly'), h = rows('heat'); if (!m || m.length < 24 || !h || !h.length) { dashT(el); return; }
+    const w = windows(m);
+    el.textContent = 'That is about ' + fmt(Math.round(w.minL / 365)) + ' minutes of delay every day. Scroll to see when and where it happens, why, and what could change it. One hour of the week may surprise you.';
+  });
+  dash.draw('chapnav', (nav) => {
+    nav.replaceChildren(...CHAPS.map(([id, lab], i) => { const a = el$('a', null, (i + 1) + ' ' + lab); a.href = '#' + id; a.setAttribute('data-go', id); return a; }));
+    if (!navBound) {
+      navBound = true;
+      document.addEventListener('click', (ev) => {
+        const a = ev.target && ev.target.closest ? ev.target.closest('a[data-go]') : null; if (!a) return;
+        const t = document.getElementById(a.getAttribute('data-go')); if (!t) return;
+        ev.preventDefault(); t.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
+      });
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { navCurrent = e.target.id; markNav(); } }), { rootMargin: '-15% 0px -75% 0px' });
+        CHAPS.forEach(([id]) => { const t = document.getElementById(id); if (t) io.observe(t); });
+      }
+    }
+    markNav();
+  });
+  dash.draw('progress', (el) => {
+    const fill = el$('div'); fill.style.cssText = 'height:4px;width:0;transition:width .12s;background:' + dash.colors[0];
+    el.replaceChildren(fill);
+    const upd = () => { const d = document.documentElement, h = d.scrollHeight - window.innerHeight; fill.style.width = (h > 0 ? Math.min(100, 100 * (window.scrollY || d.scrollTop) / h) : 0) + '%'; };
+    if (window.__ttcProg) window.removeEventListener('scroll', window.__ttcProg);
+    window.__ttcProg = upd; window.addEventListener('scroll', upd, { passive: true }); upd();
+  });
+
+  // chapter answers, computed from the data
+  const answer = (name, fn) => dash.draw(name, (el) => { let t = null; try { t = fn(); } catch (e) { t = null; } el.textContent = t || '—'; });
+  const pctUp = (a, b) => { const p = Math.round(Math.abs((a - b) / b) * 100); return p + '% ' + (a >= b ? 'higher' : 'lower'); };
+  answer('ans_1', () => { const m = rows('monthly'); if (!m || m.length < 24) return null; const w = windows(m); return fmt(w.minL) + ' minutes in the last 12 months, ' + pctUp(w.minL, w.minP) + ' than the 12 months before, across ' + fmt(w.incL) + ' incidents.'; });
+  answer('ans_2', () => { const y = rows('yearly'); if (!y || y.length < 4) return null; const full = y[y.length - 2], b19 = y.find((d) => d.yr === 2019), pk = y.reduce((a, c) => (c.total_delay_min > a.total_delay_min ? c : a)); return (b19 ? full.yr + ' logged ' + pctUp(full.total_delay_min, b19.total_delay_min) + ' delay minutes than 2019, the last full year before the pandemic. ' : '') + 'The worst year on record is ' + pk.yr + '.'; });
+  answer('ans_3', () => { const h = rows('heat'); if (!h || !h.length) return null; return 'Delays are not spread evenly across the week, and the busiest hour for incidents is not the costliest hour for lost minutes. Take the quick test, then read the maps.'; });
+  answer('ans_4', () => { const l = rows('line_ltm'), w = rows('watch'), m = rows('monthly'); if (!l || !w || !m || m.length < 24) return null; const tot = d3.sum(l, (d) => d.cur_min), top = l.filter((d) => ['YU', 'BD', 'SHP'].includes(d.line))[0]; return LINE[top.line] + ' accounts for ' + Math.round(100 * top.cur_min / tot) + '% of minutes in the last 12 months, and the 15 worst stations account for ' + Math.round(100 * d3.sum(w, (d) => d.cur_min) / windows(m).minL) + '%.'; });
+  answer('ans_5', () => { const g = rows('group_ltm'); if (!g || !g.length) return null; const tot = d3.sum(g, (d) => d.cur_min), s = g.filter((d) => d.grp !== 'Other and unclassified'); return s[0].grp + ' causes ' + Math.round(100 * s[0].cur_min / tot) + '% of delay minutes; the next largest group is ' + s[1].grp.toLowerCase() + ' at ' + Math.round(100 * s[1].cur_min / tot) + '%.'; });
+  answer('ans_6', () => { const g = rows('group_ltm'); if (!g || !g.length) return null; const tot = d3.sum(g, (d) => d.cur_min), s = g.filter((d) => d.grp !== 'Other and unclassified').slice(0, 3); return 'The three largest cause groups, ' + s[0].grp.toLowerCase() + ', ' + s[1].grp.toLowerCase() + ' and ' + s[2].grp.toLowerCase() + ', make up ' + Math.round(100 * d3.sum(s, (d) => d.cur_min) / tot) + '% of minutes. Each calls for a different kind of response, and the decisions sit with TTC management, its Board and the City.'; });
+  answer('ans_7', () => { const c = auditChecks(); if (!c) return null; const ok = c.filter((x) => x[1] === x[2]).length; return ok + ' of ' + c.length + ' totals re-add exactly to the headline figures, and every one is rechecked each time this page loads.'; });
+
+  // ---------- quick test
+  let guessPick = null;
+  dash.draw('guess', (el) => {
+    const h = rows('heat'); if (!h || !h.length) { dashT(el); return; }
+    el.replaceChildren();
+    const byMin = h.slice().sort((a, b) => b.minutes - a.minutes), ans = byMin[0];
+    const wkd = byMin.filter((d) => !['SATURDAY', 'SUNDAY'].includes(d.day_name)), o2 = wkd[0], o3 = wkd.find((d) => d.hour_of_day >= 15 && d !== o2) || wkd[1];
+    const opts = [ans, o2, o3].filter((d, i, a) => d && a.indexOf(d) === i).sort((a, b) => (DAYS.indexOf(a.day_name) - DAYS.indexOf(b.day_name)) || (a.hour_of_day - b.hour_of_day));
+    const keyOf = (d) => d.day_name + d.hour_of_day, bar = el$('div', 'keys'), out = el$('p', 'reveal');
+    const btns = opts.map((d) => { const b = el$('button', 'tog', dayName(d.day_name) + ' at ' + hh(d.hour_of_day)); b.type = 'button'; b.addEventListener('click', () => { guessPick = keyOf(d); show(); }); bar.append(b); return [d, b]; });
+    function show() {
+      btns.forEach(([d, b]) => { b.className = 'tog' + (guessPick === keyOf(d) ? ' on' : ''); b.setAttribute('aria-pressed', String(guessPick === keyOf(d))); });
+      if (!guessPick) { out.textContent = ''; return; }
+      const top2 = byMin.filter((d) => d !== ans && !['SATURDAY', 'SUNDAY'].includes(d.day_name))[0];
+      out.textContent = (guessPick === keyOf(ans) ? 'Right. ' : 'Not quite. ') + dayName(ans.day_name) + ' at ' + hh(ans.hour_of_day) + ' has cost the most delay minutes since 2014: ' + fmt(ans.minutes) + ' minutes across ' + fmt(ans.incidents) + ' incidents. The costliest weekday hour is ' + dayName(top2.day_name) + ' at ' + hh(top2.hour_of_day) + ' with ' + fmt(top2.minutes) + ' minutes. The map below shows every hour of the week.';
+    }
+    el.append(bar, out); show();
+  });
+
+  // ---------- find your station
+  let finderQ = '', finderPick = null;
+  dash.draw('finder', (el) => {
+    const st = rows('stations_all'); if (!st || !st.length) { dashT(el); return; }
+    el.replaceChildren();
+    const inp = el$('input', 'srch'); inp.type = 'search'; inp.placeholder = 'Type a station, for example Kennedy or Union'; inp.setAttribute('aria-label', 'Station name'); inp.value = finderQ;
+    const list = el$('div', 'keys'); list.style.marginTop = '8px'; const out = el$('div'); el.append(inp, list, out);
+    const title = (s) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    function showList() {
+      const q = inp.value.trim().toUpperCase(); list.replaceChildren(); if (!q) return;
+      const hits = st.filter((d) => d.station.includes(q)).slice(0, 8);
+      if (!hits.length) { list.append(el$('span', 'key', 'No station matches. Try a shorter name.')); return; }
+      hits.forEach((d) => { const b = el$('button', 'tog' + (finderPick === d.station ? ' on' : ''), title(d.station)); b.type = 'button'; b.addEventListener('click', () => { finderPick = d.station; showList(); showCard(); }); list.append(b); });
+    }
+    function showCard() {
+      out.replaceChildren(); const d = st.find((x) => x.station === finderPick); if (!d) return;
+      const cell = (lab, big, extra) => { const c = el$('div', 'cell'); c.append(el$('div', 'lab', lab), el$('div', 'big', big)); if (extra) c.append(extra); return c; };
+      const ch = el$('div', 'lab'); ch.append(chgSpan(d.cur_min, d.prev_min), document.createTextNode(' vs the 12 months before'));
+      const grid = el$('div', 'fres');
+      grid.append(cell('Rank by delay minutes', '#' + d.min_rank + ' of ' + fmt(st.length)), cell('Minutes of delay since 2014', fmt(d.total_min)), cell('Incidents since 2014', fmt(d.incidents)), cell('Minutes per incident', (d.total_min / d.incidents).toFixed(1)), cell('Last 12 months, minutes', fmt(d.cur_min), ch));
+      const p = el$('p', 'reveal', title(d.station) + (d.min_rank === 1 ? ' has more delay minutes than any other logged station name.' : ' has more delay minutes than ' + Math.floor(100 * (st.length - d.min_rank) / st.length) + '% of logged station names.') + ' A high rank usually means a busy or complex station as much as a troubled one, since this data does not count riders.');
+      out.append(grid, p);
+    }
+    inp.addEventListener('input', () => { finderQ = inp.value; showList(); });
+    showList(); showCard();
+  });
+
+  // ---------- closing
+  dash.draw('closing', (ul) => {
+    const m = rows('monthly'), g = rows('group_ltm'), h = rows('heat'); if (!m || m.length < 24 || !g || !g.length || !h || !h.length) { ul.replaceChildren(el$('li', null, '—')); return; }
+    const w = windows(m), tot = d3.sum(g, (d) => d.cur_min), s = g.filter((d) => d.grp !== 'Other and unclassified')[0], c = h.slice().sort((a, b) => b.minutes - a.minutes)[0];
+    const li = (...p) => { const l = el$('li'); p.forEach((q) => l.append(typeof q === 'string' ? document.createTextNode(q) : q)); return l; }, B = (t) => el$('b', null, t);
+    ul.replaceChildren(
+      li(B(fmt(w.minL) + ' minutes'), ' of delay in the last 12 months, ' + pctUp(w.minL, w.minP) + ' than the year before.'),
+      li(B(s.grp), ' is the largest cause group at ' + Math.round(100 * s.cur_min / tot) + '% of minutes, and those causes are decided on and responded to by people.'),
+      li('The costliest hour of the week is ', B(dayName(c.day_name) + ' at ' + hh(c.hour_of_day)), ', not a weekday rush hour.')
+    );
   });
 })();
 </script>

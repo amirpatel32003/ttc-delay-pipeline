@@ -8,7 +8,7 @@ from ttc_pipeline.cli import load_codes
 from ttc_pipeline.sample import write_sample
 
 KEYS = {"asof", "generated_at", "kpi", "yearly", "monthly", "stations", "hourly", "lines", "line_year", "buckets",
-        "causes", "cause_year", "watch", "causes_ltm", "line_ltm", "ingestion", "checks", "group_year", "group_ltm", "heat", "no_time", "daily"}
+        "causes", "cause_year", "watch", "causes_ltm", "line_ltm", "ingestion", "checks", "group_year", "group_ltm", "heat", "no_time", "daily", "stations_all"}
 
 
 @pytest.fixture()
@@ -65,3 +65,12 @@ def test_every_description_gets_exactly_one_group():
     from ttc_pipeline.export import CAUSE_GROUPS, OTHER_GROUP
     names = [n for n, _ in CAUSE_GROUPS] + [OTHER_GROUP]
     assert len(names) == len(set(names))
+
+
+def test_station_list_is_ranked_and_within_totals(payload):
+    data, con = payload
+    st = data["stations_all"]
+    assert st and st[0]["min_rank"] == 1
+    assert [r["total_min"] for r in st] == sorted((r["total_min"] for r in st), reverse=True)
+    assert sum(r["incidents"] for r in st) <= data["kpi"][0]["incidents"]
+    assert len({r["station"] for r in st}) == len(st)

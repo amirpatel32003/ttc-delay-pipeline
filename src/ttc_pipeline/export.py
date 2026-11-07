@@ -115,6 +115,12 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
         WHERE delay_time IS NULL OR day_name NOT IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')""").fetchone()[0]
     out["daily"] = [[d.isoformat(), int(n), int(m)] for d, n, m in con.execute(
         "SELECT delay_date, count(*), sum(min_delay) FROM silver_delays GROUP BY 1 ORDER BY 1").fetchall()]
+    out["stations_all"] = _rows(con, f"""
+        SELECT station, count(*) incidents, sum(min_delay) AS total_min,
+               coalesce(sum(min_delay) FILTER (WHERE {cur}), 0) cur_min,
+               coalesce(sum(min_delay) FILTER (WHERE {prev}), 0) prev_min,
+               rank() OVER (ORDER BY sum(min_delay) DESC) AS min_rank
+        FROM silver_delays WHERE is_station GROUP BY station ORDER BY total_min DESC""")
     out["ingestion"] = _rows(con, "SELECT name, format, last_modified, rows, bytes, ingested_at FROM ingestion_log ORDER BY name")
     out["checks"] = [{"name": n, "passed": bool(ok), "detail": d} for n, ok, d in quality.run_checks(con)]
     return out
