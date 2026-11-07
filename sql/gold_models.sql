@@ -15,6 +15,7 @@ SELECT station,
        round(avg(min_delay), 2)  AS avg_delay_min,
        rank() OVER (ORDER BY sum(min_delay) DESC) AS delay_rank
 FROM silver_delays
+WHERE is_station              -- segment and whole-line rows are not stations
 GROUP BY station;
 
 CREATE OR REPLACE TABLE gold_hourly_pattern AS

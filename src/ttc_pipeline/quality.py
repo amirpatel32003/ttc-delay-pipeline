@@ -14,6 +14,10 @@ CHECKS = {
         "SELECT (SELECT count(*) FROM silver_rejects) * 1.0 / "
         "greatest((SELECT count(*) FROM silver_delays) + (SELECT count(*) FROM silver_rejects), 1) > 0.05"
     ),
+    "unknown_line_rate_under_2pct": (
+        "SELECT count(*) FILTER (WHERE line IS NULL OR line = 'OTHER') * 1.0 / greatest(count(*), 1) > 0.02 "
+        "FROM silver_delays"
+    ),
     "gold_matches_silver": (
         "SELECT abs((SELECT sum(incidents) FROM gold_daily_summary) - (SELECT count(*) FROM silver_delays))"
     ),

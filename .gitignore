@@ -7,9 +7,5 @@ data/bronze/
 data/warehouse/
 *.duckdb
 .pytest_cache/
-run_log.txt
-venv/
-zz_go.bat
-run_tests.bat
-push_log.txt
-push_day1.bat
+_local/
+data/bronze_sample/

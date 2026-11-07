@@ -1,4 +1,4 @@
-"""Command line: python -m ttc_pipeline.cli [ingest|build|check|run] [--sample]"""
+"""Command line: python -m ttc_pipeline.cli [ingest|build|check|run|docs] [--sample] [--limit-files N] [--force]"""
 from __future__ import annotations
 
 import argparse
@@ -11,33 +11,26 @@ from . import config, ingest, quality, warehouse
 
 
 def load_codes(from_sample: bool) -> None:
-    config.BRONZE.mkdir(parents=True, exist_ok=True)
+    """Write the delay-code lookup into bronze (sample file offline, 'Code Descriptions' CSV online)."""
     if from_sample:
-        raw = pd.read_csv(config.SAMPLE / "codes_sample.csv", dtype=str)
+        config.BRONZE.mkdir(parents=True, exist_ok=True)
+        raw = ingest.read_codes((config.SAMPLE / "codes_sample.csv").read_bytes(), "csv")
+        raw.to_parquet(config.BRONZE / "delay_codes.parquet", index=False)
     else:
-        import requests
-        res = [r for r in ingest.list_resources() if "code" in (r.get("name") or "").lower()
-               and (r.get("format") or "").lower() in {"csv", "xlsx"}]
-        if not res:
-            return
-        r = requests.get(res[0]["url"], headers=ingest.HEADERS, timeout=120)
-        r.raise_for_status()
-        raw = pd.read_excel(pd.io.common.BytesIO(r.content), dtype=str) if res[0]["format"].lower() == "xlsx" \
-            else pd.read_csv(pd.io.common.BytesIO(r.content), dtype=str)
-    cols = {c: c.lower() for c in raw.columns}
-    code_col = next((c for c, low in cols.items() if "code" in low and "desc" not in low), raw.columns[0])
-    desc_col = next((c for c, low in cols.items() if "desc" in low), raw.columns[1])
-    out = raw[[code_col, desc_col]].rename(columns={code_col: "code", desc_col: "description"}).dropna(subset=["code"])
-    out.to_parquet(config.BRONZE / "delay_codes.parquet", index=False)
+        ingest.ingest_codes()
 
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="ttc_pipeline")
-    p.add_argument("step", choices=["ingest", "build", "check", "run"])
-    p.add_argument("--sample", action="store_true", help="use bundled synthetic data (offline)")
+    p.add_argument("step", choices=["ingest", "build", "check", "run", "docs"])
+    p.add_argument("--sample", action="store_true", help="use bundled synthetic data (offline, separate warehouse)")
     p.add_argument("--limit-files", type=int, default=None, help="only download the first N yearly files")
+    p.add_argument("--force", action="store_true", help="ignore the manifest and re-download everything")
     a = p.parse_args(argv)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+    if a.sample:  # keep synthetic data completely apart from real bronze/warehouse
+        config.BRONZE, config.WAREHOUSE = config.BRONZE_SAMPLE, config.WAREHOUSE_SAMPLE
 
     if a.step in ("ingest", "run"):
         if a.sample:
@@ -45,10 +38,14 @@ def main(argv: list[str] | None = None) -> int:
             write_sample(config.SAMPLE)
             ingest.ingest_from_sample()
         else:
-            ingest.ingest_from_api(a.limit_files)
+            ingest.ingest_from_api(a.limit_files, force=a.force)
         load_codes(a.sample)
-    if a.step in ("build", "run", "check"):
+    if a.step in ("build", "run", "check", "docs"):
         con = warehouse.build()
+        if a.step == "docs":
+            from . import docs
+            path = docs.write_schema_doc(con)
+            print(f"wrote {path}")
         if a.step in ("check", "run"):
             results = quality.run_checks(con)
             for name, ok, detail in results:

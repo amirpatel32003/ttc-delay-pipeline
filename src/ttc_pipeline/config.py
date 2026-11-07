@@ -4,8 +4,12 @@ ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 RAW = DATA / "raw"
 BRONZE = DATA / "bronze"
+BRONZE_SAMPLE = DATA / "bronze_sample"   # --sample runs never touch real bronze
 WAREHOUSE = DATA / "warehouse" / "ttc.duckdb"
+WAREHOUSE_SAMPLE = DATA / "warehouse" / "ttc_sample.duckdb"
+MANIFEST_NAME = "_manifest.json"   # incremental-load ledger, lives next to the bronze parquet files
 SQL = ROOT / "sql"
+DOCS = ROOT / "docs"
 SAMPLE = DATA / "sample"
 
 CKAN = "https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action"
