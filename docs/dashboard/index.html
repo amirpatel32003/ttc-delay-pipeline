@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TTC subway delays, 2014 to today</title>
+<meta name="description" content="Open dashboard of TTC subway delays built from City of Toronto open data. Independent analysis.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root { color-scheme: light dark;
+  --font-anthropic-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --font-anthropic-serif: Georgia, "Times New Roman", serif;
+  --bg: #f7f7f5; --color-panel: #ffffff; --color-border-line: #e3e2dc; --color-fg: #1f1e1b; --color-fg-muted: #6b6a63;
+  --color-ok: #1f7a4d; --color-bad: #b3402a; --cds-chart-grid: #e8e7e1; --cds-chart-axis: #b9b8b0;
+  --cds-surface-popover: #ffffff; --cds-border: #d6d5cd; --cds-shadow-popover: 0 4px 14px rgba(0,0,0,.12); --cds-text-secondary: #6b6a63;
+  --c0: #3b6ea8; --c1: #d9822b; --c2: #3f9275; --c3: #8a5fb0;
+  --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 22px; --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-lg: 18px; --cds-radius: 10px;
+  --cds-font-size-title: 30px; --cds-font-size-heading: 16px; --cds-font-size-caption: 13px; --cds-font-size-body: 15px; --cds-font-weight-medium: 600; --dash-gutter: clamp(12px, 3vw, 28px); }
+@media (prefers-color-scheme: dark) { :root { --bg: #161614; --color-panel: #1f1f1c; --color-border-line: #33332e; --color-fg: #ecebe6; --color-fg-muted: #a3a29a;
+  --color-ok: #5fcf9a; --color-bad: #f08a72; --cds-chart-grid: #2d2d29; --cds-chart-axis: #55554f; --cds-surface-popover: #26261f; --cds-border: #45453d; --cds-text-secondary: #a3a29a;
+  --c0: #6ea8e0; --c1: #f0a050; --c2: #6cc3a0; --c3: #b793d8; } }
+html { background: var(--bg); } body { margin: 0; padding: var(--dash-gutter); background: var(--bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); }
+a { color: inherit; }
+
+.ttc { max-width: 1180px; margin-inline: auto; font-family: var(--font-anthropic-sans); display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
+.ttc h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+.ttc .sub { margin: 4px 0 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ttc .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+.ttc .card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0 0 2px; }
+.ttc .note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: 0 0 var(--cds-gap-md); line-height: 1.45; max-width: 80ch; }
+.ttc .sect { font-size: var(--cds-font-size-caption); letter-spacing: .04em; text-transform: uppercase; color: var(--color-fg-muted); margin: var(--cds-gap-md) 0 calc(-1 * var(--cds-gap-sm)); }
+.ttc .brief ul { margin: 6px 0 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 8px; line-height: 1.5; max-width: 90ch; }
+.ttc .brief li b { font-variant-numeric: tabular-nums; }
+.ttc .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr)); gap: var(--cds-gap-md); }
+.ttc .tile .lab { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ttc .tile .num { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+.ttc .tile .dl { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.ttc .tile .ctx { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: 2px; }
+.ttc .up { color: var(--color-bad); } .ttc .down { color: var(--color-ok); } .ttc .flat { color: var(--color-fg-muted); }
+.ttc .ok { color: var(--color-ok); } .ttc .bad { color: var(--color-bad); }
+.ttc .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); gap: var(--cds-gap-md); }
+.ttc .chart { position: relative; min-height: 240px; }
+.ttc .chart.short { min-height: 200px; }
+.ttc .chart svg { display: block; width: 100%; height: auto; }
+.ttc .chart text { fill: var(--color-fg-muted); font-size: 11px; font-family: var(--font-anthropic-sans); }
+.ttc .tt { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 2; }
+.ttc .tt .h { color: var(--cds-text-secondary); }
+.ttc .keys { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 8px; }
+.ttc .key { display: inline-flex; align-items: center; gap: 6px; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ttc .sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+.ttc .tbl { overflow-x: auto; }
+.ttc table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-caption); }
+.ttc th { text-align: left; font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); padding: 6px 8px; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.ttc td { padding: 6px 8px; border-bottom: 1px solid var(--color-border-line); font-variant-numeric: tabular-nums; }
+.ttc th.n, .ttc td.n { text-align: right; }
+.ttc tr.hl td { font-weight: 600; }
+.ttc td .mini { display: inline-block; height: 8px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+.ttc td.cell { text-align: right; min-width: 3.4rem; }
+.ttc details { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.5; }
+.ttc details summary { cursor: pointer; color: var(--color-fg); }
+.ttc details p { margin: 6px 0; max-width: 85ch; }
+.ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+@media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
+</style>
+</head><body>
+
+
+<div class="ttc">
+  <header>
+    <h1>TTC subway service delays</h1>
+    <p class="sub">Executive view &middot; data through <span data-draw="asof" data-source="kpi">—</span> &middot; City of Toronto Open Data, TTC Subway Delay Data &middot; refreshed <span data-generated>—</span> &middot; independent analysis, not an official TTC report &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
+  </header>
+
+  <section class="card brief" aria-label="Summary">
+    <h2>What the data says</h2>
+    <ul data-draw="brief" data-source="monthly yearly line_ltm causes_ltm watch">—</ul>
+  </section>
+
+  <section class="tiles" aria-label="Key indicators" data-draw="tiles" data-source="monthly buckets">—</section>
+
+  <div class="sect">Trend</div>
+  <section class="card">
+    <h2>Minutes of delay per month</h2>
+    <p class="note">Bars are monthly totals; the line is the trailing 12-month average. Shaded band marks March 2020 to December 2021, when service and ridership were far below normal.</p>
+    <div class="chart" data-draw="monthly" data-source="monthly">—</div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>How severe are delays?</h2>
+      <p class="note">Incidents with at least one minute of delay, by length. Incidents of 30 minutes or more are rare, but they account for about a fifth of the minutes lost.</p>
+      <div class="keys" data-draw="bkeys" data-source="buckets">—</div>
+      <div class="chart short" data-draw="severity" data-source="buckets">—</div>
+    </div>
+    <div class="card">
+      <h2>Year by year</h2>
+      <p class="note">2026 covers January to September only; per-day figures account for that.</p>
+      <div class="tbl"><table><thead><tr><th>Year</th><th class="n">Incidents</th><th class="n">Minutes</th><th class="n">Min / day</th><th class="n">30+ min</th><th class="n">Peak share</th></tr></thead><tbody data-draw="year_body" data-source="buckets"></tbody></table></div>
+      <p class="note" style="margin-top:8px">Peak share is the portion of incidents on weekdays between 06:00&ndash;09:59 and 15:00&ndash;18:59.</p>
+    </div>
+  </section>
+
+  <div class="sect">Where</div>
+  <section class="grid">
+    <div class="card">
+      <h2>By line, last 12 months</h2>
+      <p class="note">Minutes of delay against the 12 months before. Other covers Line 3 (closed July 2023) and incidents tagged to both lines or to no line.</p>
+      <div class="tbl"><table><thead><tr><th>Line</th><th class="n">Minutes</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">vs prior</th></tr></thead><tbody data-draw="line_body" data-source="line_ltm"></tbody></table></div>
+    </div>
+    <div class="card">
+      <h2>Minutes of delay by line, per year</h2>
+      <p class="note">Line 3 (SRT) closed in July 2023, so its delays stop there.</p>
+      <div class="keys" id="lkey"></div>
+      <div class="chart short" data-draw="lineyear" data-source="line_year">—</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Station watchlist, last 12 months</h2>
+    <p class="note">The 15 stations with the most delay minutes, against the 12 months before. Large swings can come from one or two long incidents, so read minutes per incident alongside the change.</p>
+    <div class="tbl"><table><thead><tr><th>Station</th><th>Minutes lost</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">Min / incident</th></tr></thead><tbody data-draw="watch_body" data-source="watch"></tbody></table></div>
+  </section>
+
+  <div class="sect">Why</div>
+  <section class="grid">
+    <div class="card">
+      <h2>Top causes, last 12 months</h2>
+      <p class="note">Delay codes as published, ranked by minutes lost.</p>
+      <div class="tbl"><table><thead><tr><th>Cause</th><th class="n">Minutes</th><th class="n">vs prior</th><th class="n">Incidents</th></tr></thead><tbody data-draw="cause_body" data-source="causes_ltm"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Largest causes over time</h2>
+      <p class="note">Minutes per year for the six causes with the most minutes overall. Darker cells are that cause's worst years.</p>
+      <div class="tbl"><table data-draw="cause_matrix" data-source="cause_year"></table></div>
+  </section>
+
+  <div class="sect">When</div>
+  <section class="grid">
+    <div class="card">
+      <h2>Weekday and hour</h2>
+      <p class="note">Incidents by day of week and hour, 2014 to 2026 together. Darker means more.</p>
+      <div class="chart" data-draw="heat" data-source="hourly">—</div>
+    </div>
+    <div class="card">
+      <h2>Incidents by hour</h2>
+      <p class="note">All days together.</p>
+      <div class="chart" data-draw="hourly" data-source="hourly_sum">—</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Data quality and sources</h2>
+    <p class="note">Every build of the pipeline runs these checks and loads each source file once; a file whose last-modified time is unchanged is skipped.</p>
+    <div class="grid">
+      <div class="tbl"><table><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody data-draw="checks_body" data-source="checks"></tbody></table></div>
+      <div class="tbl"><table><thead><tr><th>Source file</th><th>Last modified</th><th class="n">Rows</th></tr></thead><tbody data-draw="ingest_body" data-source="ingestion"></tbody></table></div>
+    </div>
+  </section>
+
+  <details>
+    <summary>Definitions and limits</summary>
+    <p>An incident is one row of the City's subway delay log after exact duplicates are removed. Minutes of delay is the figure published for the incident; many incidents log zero minutes.</p>
+    <p>Last 12 months means the 12 months ending with the latest data; prior means the 12 months before that. Major incidents are those of 30 minutes or more.</p>
+    <p>Minutes are train delay as logged, not customer-minutes: the data has no ridership or train counts, so a short delay at a busy time and a longer one overnight count by their logged minutes only.</p>
+    <p>Station names are cleaned, so both platforms of a station count as one. Rows that name a stretch of track or a whole line stay in line and total figures but are not ranked as stations. Excel years hold one sheet per month; the pipeline reads every sheet.</p>
+    <p>This page is rebuilt automatically from the City's open data by the pipeline's scheduled workflow; the refreshed date above is when that last ran. The City updates the data on its own schedule, so the data-through date can be earlier.</p>
+  </details>
+</div>
+
+<script>
+const dash = (() => {
+  const store = {}, calcs = [], draws = [];
+  const api = {
+    colors: ['var(--c0)', 'var(--c1)', 'var(--c2)', 'var(--c3)'],
+    data: (id) => (id in store ? { status: 'ok', data: store[id] } : { status: 'loading' }),
+    calc: (id, spec) => calcs.push([id, spec]),
+    draw: (name, fn) => draws.push([name, fn])
+  };
+  const run = () => {
+    calcs.forEach(([id, spec]) => { try { store[id] = spec.fn(...spec.inputs.map((i) => store[i])); } catch (e) { console.error(id, e); } });
+    draws.forEach(([name, fn]) => document.querySelectorAll('[data-draw="' + name + '"]').forEach((el) => { try { fn(el); } catch (e) { console.error(name, e); } }));
+  };
+  fetch('dashboard_data.json', { cache: 'no-cache' }).then((r) => r.json()).then((p) => {
+    Object.assign(store, p);
+    document.querySelectorAll('[data-generated]').forEach((e) => { e.textContent = new Date(p.generated_at).toLocaleDateString('en-CA', { year: 'numeric', month: 'short', day: 'numeric' }); });
+    const go = () => requestAnimationFrame(run);
+    window.addEventListener('DOMContentLoaded', go); if (document.readyState !== 'loading') go();
+    let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
+  }).catch((e) => { document.body.insertAdjacentHTML('afterbegin', '<p style="color:var(--color-bad)">Could not load dashboard_data.json: ' + e.message + '</p>'); });
+  return api;
+})();
+</script>
+<script>
+(function () {
+  const fmt = d3.format(','), cmp = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+  const rows = (id) => { const g = dash.data(id); return g.status === 'ok' ? g.data : null; };
+  const dashT = (el) => el.replaceChildren(document.createTextNode('—'));
+  const monthFmt = d3.utcFormat('%b %Y'), dayFmt = d3.utcFormat('%-d %b %Y');
+  const LINE = { YU: 'Line 1 (YU)', BD: 'Line 2 (BD)', SHP: 'Line 4 (SHP)', SRT: 'Line 3 (SRT)', OTHER: 'Other', UNKNOWN: 'Other', 'YU/BD': 'Other' };
+  const WK = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const el$ = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
+  const svgEl = (tag, attrs, parent) => {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    Object.entries(attrs).forEach(([k, v]) => e.setAttribute(k, v));
+    if (parent) parent.appendChild(e);
+    return e;
+  };
+  const tint = (c, p) => `color-mix(in srgb, ${c} ${Math.round(p * 100)}%, transparent)`;
+
+  // change vs a prior value; up is bad for delay measures
+  const chg = (cur, prev) => {
+    if (!prev) return { txt: 'new', cls: 'flat' };
+    const p = (cur - prev) / prev;
+    if (Math.abs(p) < 0.005) return { txt: '0%', cls: 'flat' };
+    return { txt: (p > 0 ? '▲ ' : '▼ ') + Math.abs(Math.round(p * 100)) + '%', cls: p > 0 ? 'up' : 'down', p };
+  };
+  const chgSpan = (cur, prev) => { const c = chg(cur, prev); return el$('span', c.cls, c.txt); };
+
+  // monthly helpers: last 12 / prior 12 months, same-months YTD
+  function windows(m) {
+    const n = m.length, last = m.slice(n - 12), prev = m.slice(n - 24, n - 12);
+    const sum = (a, k) => d3.sum(a, (d) => d[k]);
+    return { last, prev, minL: sum(last, 'total_delay_min'), minP: sum(prev, 'total_delay_min'), incL: sum(last, 'incidents'), incP: sum(prev, 'incidents') };
+  }
+
+  dash.calc('check_summary', { inputs: ['checks'], title: 'Quality checks passing', description: 'Counts passed checks.', fn: (c) => [{ passed: c.filter((x) => x.passed).length, total: c.length }] });
+  dash.calc('hourly_sum', {
+    inputs: ['hourly'], title: 'Incidents by hour of day', description: 'Sums hourly rows across weekdays; average weighted by incidents.',
+    fn: (h) => d3.rollups(h, (v) => ({ incidents: d3.sum(v, (d) => d.incidents), avg_delay_min: d3.sum(v, (d) => d.incidents * d.avg_delay_min) / d3.sum(v, (d) => d.incidents) }), (d) => d.hour_of_day)
+      .map(([hour_of_day, o]) => ({ hour_of_day, ...o })).sort((a, b) => a.hour_of_day - b.hour_of_day)
+  });
+
+  dash.draw('asof', (el) => { const k = rows('kpi'); el.textContent = k && k[0] ? dayFmt(new Date(k[0].last_date + 'T00:00:00Z')) : '—'; });
+
+  // ---------- summary bullets
+  dash.draw('brief', (ul) => {
+    const m = rows('monthly'), y = rows('yearly'), ln = rows('line_ltm'), ca = rows('causes_ltm'), wa = rows('watch');
+    if (![m, y, ln, ca, wa].every((x) => x && x.length) || m.length < 24) { ul.replaceChildren(el$('li', null, '—')); return; }
+    const w = windows(m), items = [];
+    const dir = (a, b) => (a >= b ? 'up' : 'down');
+    const li = (parts) => { const l = el$('li'); parts.forEach((p) => l.append(typeof p === 'string' ? document.createTextNode(p) : p)); return l; };
+    const B = (t) => el$('b', null, t);
+    const pm = Math.round(Math.abs((w.minL - w.minP) / w.minP) * 100), pi = Math.round(Math.abs((w.incL - w.incP) / w.incP) * 100);
+    items.push(li(['Over the last 12 months the subway lost ', B(fmt(w.minL)), ' minutes to delays, ' + dir(w.minL, w.minP) + ' ', B(pm + '%'), ' on the prior 12 months, across ', B(fmt(w.incL)), ' incidents (' + dir(w.incL, w.incP) + ' ' + pi + '%).']));
+    const pk = y.reduce((a, b) => (b.total_delay_min > a.total_delay_min ? b : a)), ly = y.filter((d) => d.yr < y[y.length - 1].yr).slice(-1)[0];
+    items.push(li([B(String(pk.yr)), ' is the worst year on record at ', B(fmt(pk.total_delay_min)), ' minutes; ' + ly.yr + ' followed at ' + fmt(ly.total_delay_min) + '. Minutes now sit well above the 2014–2019 range of ' + fmt(d3.min(y.filter((d) => d.yr <= 2019), (d) => d.total_delay_min)) + ' to ' + fmt(d3.max(y.filter((d) => d.yr <= 2019), (d) => d.total_delay_min)) + '.']));
+    const lines = ln.filter((d) => ['YU', 'BD', 'SHP'].includes(d.line)), tot = d3.sum(ln, (d) => d.cur_min);
+    const top = lines[0], rise = lines.reduce((a, b) => ((b.cur_min - b.prev_min) > (a.cur_min - a.prev_min) ? b : a));
+    items.push(li([B(LINE[top.line]), ' accounts for ', B(Math.round(100 * top.cur_min / tot) + '%'), ' of last-12-month minutes. ', B(LINE[rise.line]), ' added the most minutes against the prior year (' + (rise.cur_min >= rise.prev_min ? '+' : '−') + fmt(Math.abs(rise.cur_min - rise.prev_min)) + ').']));
+    const c1 = ca[0], cr = ca.reduce((a, b) => ((b.cur_min - b.prev_min) > (a.cur_min - a.prev_min) ? b : a));
+    items.push(li(['The largest single cause is ', B(c1.description.toLowerCase()), ' (' + fmt(c1.cur_min) + ' minutes). The biggest increase is ', B(cr.description.toLowerCase()), ', ' + fmt(cr.prev_min) + ' → ' + fmt(cr.cur_min) + ' minutes' + (cr.cur_inc < 100 ? ', from just ' + fmt(cr.cur_inc) + ' incidents' : '') + '.']));
+    const wr = wa.reduce((a, b) => (((b.cur_min || 0) - (b.prev_min || 0)) > ((a.cur_min || 0) - (a.prev_min || 0)) ? b : a));
+    items.push(li(['Among the 15 worst stations, ', B(wr.station), ' rose most, ' + fmt(wr.prev_min || 0) + ' → ' + fmt(wr.cur_min) + ' minutes; ', B(wa[0].station), ' lost the most time.']));
+    ul.replaceChildren(...items);
+  });
+
+  // ---------- tiles
+  dash.draw('tiles', (box) => {
+    const m = rows('monthly'), b = rows('buckets');
+    if (!m || !b || m.length < 24) { dashT(box); return; }
+    const w = windows(m), last = b[b.length - 1], full = b[b.length - 2], mths = new Set(m.map((d) => d.month.slice(0, 7)));
+    const first = new Date(m[0].month + 'T00:00:00Z'), lastM = new Date(m[m.length - 1].month + 'T00:00:00Z');
+    const expected = d3.utcMonth.range(first, d3.utcMonth.offset(lastM, 1)).length;
+    const tile = (lab, num, dl, ctx) => { const c = el$('div', 'card tile'); c.append(el$('div', 'lab', lab), el$('div', 'num', num)); if (dl) c.append(dl); c.append(el$('div', 'ctx', ctx)); return c; };
+    const dl = (cur, prev, suffix) => { const d = el$('div', 'dl'); d.append(chgSpan(cur, prev), document.createTextNode(' ' + suffix)); return d; };
+    const peak = (r) => 100 * r.peak_incidents / r.incidents;
+    const tiles = [
+      tile('Minutes lost, last 12 months', fmt(w.minL), dl(w.minL, w.minP, 'vs prior 12 months'), 'Sum of delay on every incident'),
+      tile('Incidents, last 12 months', fmt(w.incL), dl(w.incL, w.incP, 'vs prior 12 months'), 'Includes incidents that logged zero minutes'),
+      tile('Minutes lost per day', fmt(Math.round(w.minL / 365)), dl(w.minL, w.minP, 'vs prior 12 months'), 'Last 12 months, every day of the year'),
+      tile('Major incidents (30+ min), ' + full.yr, fmt(full.b4), dl(full.b4, b[b.length - 3].b4, 'vs ' + b[b.length - 3].yr), last.yr + ' so far: ' + fmt(last.b4) + ' through September'),
+      tile('Share of minutes from major incidents, ' + full.yr, Math.round(100 * full.major_min / full.total_min) + '%', null, fmt(full.b4) + ' of ' + fmt(full.b1 + full.b2 + full.b3 + full.b4) + ' incidents with a delay'),
+      tile('Peak-period share of incidents, ' + full.yr, Math.round(peak(full)) + '%', dl(peak(full), peak(b[b.length - 3]), 'vs ' + b[b.length - 3].yr), 'Weekday 06:00–09:59 and 15:00–18:59'),
+      tile('Months of data', mths.size + ' of ' + expected, null, monthFmt(first) + ' to ' + monthFmt(lastM) + (mths.size === expected ? ', none missing' : ', gaps present'))
+    ];
+    box.replaceChildren(...tiles);
+  });
+
+  // ---------- tooltip + monthly chart
+  function tooltip(el) {
+    const t = el$('div', 'tt'); t.hidden = true; el.appendChild(t);
+    return {
+      show(head, lines, x, y) {
+        t.replaceChildren(); t.appendChild(el$('div', 'h', head));
+        lines.forEach((l) => t.appendChild(el$('div', null, l)));
+        t.hidden = false;
+        const w = el.clientWidth, tw = t.offsetWidth;
+        t.style.left = Math.max(0, Math.min(w - tw, x + 12)) + 'px';
+        t.style.top = Math.max(0, y - 8) + 'px';
+      },
+      hide() { t.hidden = true; }
+    };
+  }
+
+  dash.draw('monthly', (el) => {
+    const m = rows('monthly');
+    if (!m || !m.length) { dashT(el); return; }
+    el.replaceChildren();
+    const W = Math.max(el.clientWidth, 280), H = 280, mg = { t: 10, r: 8, b: 26, l: 44 };
+    const data = m.map((d, i, a) => ({ ...d, date: new Date(d.month + 'T00:00:00Z'), roll: i >= 11 ? d3.mean(a.slice(i - 11, i + 1), (q) => q.total_delay_min) : null }));
+    const x = d3.scaleUtc([data[0].date, d3.utcMonth.offset(data[data.length - 1].date, 1)], [mg.l, W - mg.r]);
+    const yy = d3.scaleLinear([0, d3.max(data, (d) => d.total_delay_min)], [H - mg.b, mg.t]).nice();
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Monthly minutes of delay with trailing 12-month average' }, el);
+    const a0 = Math.max(mg.l, x(Date.UTC(2020, 2, 1))), a1 = Math.min(W - mg.r, x(Date.UTC(2022, 0, 1)));
+    if (a1 > a0) svgEl('rect', { x: a0, y: mg.t, width: a1 - a0, height: H - mg.b - mg.t, fill: 'var(--color-fg-muted)', opacity: 0.1 }, svg);
+    yy.ticks(4).forEach((v) => {
+      svgEl('line', { x1: mg.l, x2: W - mg.r, y1: yy(v), y2: yy(v), stroke: 'var(--cds-chart-grid)' }, svg);
+      svgEl('text', { x: mg.l - 6, y: yy(v) + 4, 'text-anchor': 'end' }, svg).textContent = cmp.format(v);
+    });
+    x.ticks(d3.utcYear.every(2)).forEach((v) => svgEl('text', { x: x(v), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = d3.utcFormat('%Y')(v));
+    const bars = data.map((d) => svgEl('rect', { x: x(d.date), y: yy(d.total_delay_min), width: Math.max(1.5, x(d3.utcMonth.offset(d.date, 1)) - x(d.date) - 1), height: H - mg.b - yy(d.total_delay_min), fill: tint(dash.colors[0], 0.55), rx: 1 }, svg));
+    const pts = data.filter((d) => d.roll != null);
+    svgEl('path', { d: d3.line().x((d) => x(d.date) + (x(d3.utcMonth.offset(d.date, 1)) - x(d.date)) / 2).y((d) => yy(d.roll))(pts), fill: 'none', stroke: dash.colors[1], 'stroke-width': 2.2 }, svg);
+    const tip = tooltip(el);
+    const over = svgEl('rect', { x: mg.l, y: mg.t, width: W - mg.l - mg.r, height: H - mg.b - mg.t, fill: 'transparent' }, svg);
+    over.addEventListener('pointermove', (ev) => {
+      const r = svg.getBoundingClientRect(), t = x.invert((ev.clientX - r.left) * (W / r.width));
+      let best = 0, bd = Infinity; data.forEach((d, i) => { const dd = Math.abs(d.date - t); if (dd < bd) { bd = dd; best = i; } });
+      const d = data[best]; bars.forEach((b, i) => b.setAttribute('opacity', i === best ? 1 : 0.5));
+      const eb = el.getBoundingClientRect();
+      tip.show(monthFmt(d.date), [fmt(d.total_delay_min) + ' minutes', fmt(d.incidents) + ' incidents', d.roll != null ? '12-month average ' + fmt(Math.round(d.roll)) : ''].filter(Boolean), ev.clientX - eb.left, ev.clientY - eb.top);
+    });
+    over.addEventListener('pointerleave', () => { bars.forEach((b) => b.setAttribute('opacity', 1)); tip.hide(); });
+  });
+
+  // ---------- severity stacked columns
+  const BK = [['b1', '1–4 min'], ['b2', '5–14 min'], ['b3', '15–29 min'], ['b4', '30+ min']];
+  dash.draw('bkeys', (box) => {
+    const b = rows('buckets'); if (!b) { dashT(box); return; }
+    box.replaceChildren(...BK.map(([, l], i) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = dash.colors[i]; k.append(s, l); return k; }));
+  });
+  dash.draw('severity', (el) => {
+    const b = rows('buckets'); if (!b || !b.length) { dashT(el); return; }
+    el.replaceChildren();
+    const W = Math.max(el.clientWidth, 280), H = 230, mg = { t: 8, r: 6, b: 24, l: 40 };
+    const x = d3.scaleBand(b.map((d) => d.yr), [mg.l, W - mg.r]).padding(0.18);
+    const tot = (d) => d.b1 + d.b2 + d.b3 + d.b4;
+    const yy = d3.scaleLinear([0, d3.max(b, tot)], [H - mg.b, mg.t]).nice();
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Delay incidents by length per year' }, el);
+    yy.ticks(4).forEach((v) => { svgEl('line', { x1: mg.l, x2: W - mg.r, y1: yy(v), y2: yy(v), stroke: 'var(--cds-chart-grid)' }, svg); svgEl('text', { x: mg.l - 6, y: yy(v) + 4, 'text-anchor': 'end' }, svg).textContent = cmp.format(v); });
+    b.forEach((d) => { if (d.yr % 2 === 0 || b.length < 8) svgEl('text', { x: x(d.yr) + x.bandwidth() / 2, y: H - 8, 'text-anchor': 'middle' }, svg).textContent = String(d.yr); });
+    const tip = tooltip(el);
+    b.forEach((d) => {
+      let acc = 0; const g = svgEl('g', {}, svg);
+      BK.forEach(([k], i) => { const y0 = yy(acc + d[k]), h = yy(acc) - y0; acc += d[k]; svgEl('rect', { x: x(d.yr), y: y0, width: x.bandwidth(), height: Math.max(0, h), fill: dash.colors[i] }, g); });
+      const hit = svgEl('rect', { x: x(d.yr) - 2, y: mg.t, width: x.bandwidth() + 4, height: H - mg.b - mg.t, fill: 'transparent' }, svg);
+      hit.addEventListener('pointermove', (ev) => { const eb = el.getBoundingClientRect(); tip.show(String(d.yr), BK.map(([k, l]) => l + ': ' + fmt(d[k])), ev.clientX - eb.left, ev.clientY - eb.top); });
+      hit.addEventListener('pointerleave', () => tip.hide());
+    });
+  });
+
+  // ---------- tables
+  const body = (name, id, build) => dash.draw(name, (tb) => {
+    const r = rows(id); if (!r) { return; }
+    tb.replaceChildren(...build(r).map((cells) => {
+      const tr = el$('tr'); if (cells.hl) tr.className = 'hl';
+      cells.forEach(([content, cls]) => { const td = el$('td', cls); if (content instanceof Node) td.append(content); else td.textContent = content; tr.appendChild(td); });
+      return tr;
+    }));
+  });
+  body('year_body', 'buckets', (r) => r.slice().reverse().map((d) => {
+    const c = [[String(d.yr) + (d.yr === r[r.length - 1].yr ? ' YTD' : '')], [fmt(d.incidents), 'n'], [fmt(d.total_min), 'n'], [(d.total_min / d.active_days).toFixed(0), 'n'], [fmt(d.b4), 'n'], [Math.round(100 * d.peak_incidents / d.incidents) + '%', 'n']];
+    return c;
+  }));
+  body('line_body', 'line_ltm', (r) => {
+    const g = { YU: 0, BD: 1, SHP: 2 }, main = r.filter((d) => g[d.line] != null).sort((a, b) => g[a.line] - g[b.line]);
+    const oth = r.filter((d) => g[d.line] == null);
+    const rowsOut = main.map((d) => [[LINE[d.line]], [fmt(d.cur_min), 'n'], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n'], [chgSpan(d.cur_inc, d.prev_inc), 'n']]);
+    const o = { cur_min: d3.sum(oth, (d) => d.cur_min), prev_min: d3.sum(oth, (d) => d.prev_min), cur_inc: d3.sum(oth, (d) => d.cur_inc), prev_inc: d3.sum(oth, (d) => d.prev_inc) };
+    rowsOut.push([['Other'], [fmt(o.cur_min), 'n'], [chgSpan(o.cur_min, o.prev_min), 'n'], [fmt(o.cur_inc), 'n'], [chgSpan(o.cur_inc, o.prev_inc), 'n']]);
+    return rowsOut;
+  });
+  body('watch_body', 'watch', (r) => {
+    const mx = d3.max(r, (d) => d.cur_min);
+    return r.map((d) => {
+      const cell = el$('span'); const bar = el$('span', 'mini'); bar.style.width = Math.max(2, 120 * d.cur_min / mx) + 'px'; bar.style.background = dash.colors[0];
+      cell.append(bar, document.createTextNode(fmt(d.cur_min)));
+      return [[d.station], [cell], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n'], [(d.cur_min / d.cur_inc).toFixed(1), 'n']];
+    });
+  });
+  body('cause_body', 'causes_ltm', (r) => r.map((d) => [[d.description.charAt(0) + d.description.slice(1).toLowerCase()], [fmt(d.cur_min), 'n'], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n']]));
+  body('checks_body', 'checks', (r) => r.map((d) => [[d.name.replace(/_/g, ' ')], [d.passed ? 'pass' : 'fail', d.passed ? 'ok' : 'bad']]));
+  body('ingest_body', 'ingestion', (r) => r.map((d) => [[d.name.replace(/^TTC Subway Delay Data /, '').replace('ttc-subway-delay-data-', '')], [String(d.last_modified).slice(0, 10)], [fmt(d.rows), 'n']]));
+
+  dash.draw('cause_matrix', (tbl) => {
+    const r = rows('cause_year'); if (!r || !r.length) { dashT(tbl); return; }
+    const years = [...new Set(r.map((d) => d.yr))].sort((a, b) => a - b);
+    const codes = d3.rollups(r, (v) => ({ d: v[0].description, t: d3.sum(v, (q) => q.total_min) }), (d) => d.code).sort((a, b) => b[1].t - a[1].t);
+    const thead = el$('thead'), hr = el$('tr'); hr.append(el$('th', null, 'Cause'));
+    years.forEach((y) => hr.append(el$('th', 'n', String(y).slice(2))));
+    thead.append(hr);
+    const tb = el$('tbody');
+    codes.forEach(([code, o]) => {
+      const tr = el$('tr'); tr.append(el$('td', null, o.d.charAt(0) + o.d.slice(1).toLowerCase()));
+      const vals = years.map((y) => (r.find((q) => q.code === code && q.yr === y) || {}).total_min || 0), mx = d3.max(vals);
+      vals.forEach((v, i) => { const td = el$('td', 'cell', v ? cmp.format(v) : '–'); td.style.background = tint(dash.colors[0], 0.1 + 0.6 * v / mx); td.title = years[i] + ': ' + fmt(v) + ' minutes'; tr.append(td); });
+      tb.append(tr);
+    });
+    tbl.replaceChildren(thead, tb);
+  });
+
+  // ---------- line trend
+  dash.draw('lineyear', (el) => {
+    const r = rows('line_year'); if (!r || !r.length) { dashT(el); return; }
+    el.replaceChildren();
+    const names = ['YU', 'BD', 'SHP', 'SRT'];
+    const W = Math.max(el.clientWidth, 280), H = 220, mg = { t: 10, r: 10, b: 24, l: 44 };
+    const years = [...new Set(r.map((d) => d.yr))].sort((a, b) => a - b);
+    const x = d3.scalePoint(years, [mg.l + 8, W - mg.r - 8]), yy = d3.scaleLinear([0, d3.max(r, (d) => d.total_delay_min)], [H - mg.b, mg.t]).nice();
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Minutes of delay by line and year' }, el);
+    yy.ticks(4).forEach((v) => { svgEl('line', { x1: mg.l, x2: W - mg.r, y1: yy(v), y2: yy(v), stroke: 'var(--cds-chart-grid)' }, svg); svgEl('text', { x: mg.l - 6, y: yy(v) + 4, 'text-anchor': 'end' }, svg).textContent = cmp.format(v); });
+    years.forEach((v, i) => { if (i % 2 === 0) svgEl('text', { x: x(v), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = String(v); });
+    names.forEach((n, i) => {
+      const pts = r.filter((d) => d.line === n).sort((a, b) => a.yr - b.yr);
+      svgEl('path', { d: d3.line().x((d) => x(d.yr)).y((d) => yy(d.total_delay_min))(pts), fill: 'none', stroke: dash.colors[i], 'stroke-width': 2 }, svg);
+    });
+    const key = document.getElementById('lkey');
+    if (key) key.replaceChildren(...names.map((n, i) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = dash.colors[i]; k.append(s, LINE[n]); return k; }));
+    const tip = tooltip(el);
+    const over = svgEl('rect', { x: mg.l, y: mg.t, width: W - mg.l - mg.r, height: H - mg.b - mg.t, fill: 'transparent' }, svg);
+    over.addEventListener('pointermove', (ev) => {
+      const b = svg.getBoundingClientRect(), px = (ev.clientX - b.left) * (W / b.width);
+      const yr = years.reduce((a, c) => (Math.abs(x(c) - px) < Math.abs(x(a) - px) ? c : a));
+      const eb = el.getBoundingClientRect();
+      tip.show(String(yr) + (yr === years[years.length - 1] ? ' (to Sep)' : ''), names.map((n) => { const d = r.find((q) => q.yr === yr && q.line === n); return LINE[n] + ': ' + (d ? fmt(d.total_delay_min) : '0') + ' min'; }), ev.clientX - eb.left, ev.clientY - eb.top);
+    });
+    over.addEventListener('pointerleave', () => tip.hide());
+  });
+
+  // ---------- heatmap + hourly
+  dash.draw('heat', (el) => {
+    const h = rows('hourly'); if (!h || !h.length) { dashT(el); return; }
+    el.replaceChildren();
+    const W = Math.max(el.clientWidth, 280), mg = { t: 4, r: 4, b: 22, l: 34 }, rh = 24, H = mg.t + mg.b + rh * 7;
+    const x = d3.scaleBand(d3.range(24), [mg.l, W - mg.r]).padding(0.06), yb = d3.scaleBand(WK, [mg.t, H - mg.b]).padding(0.08);
+    const mx = d3.max(h, (d) => d.incidents);
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Incidents by weekday and hour' }, el);
+    WK.forEach((d) => svgEl('text', { x: mg.l - 4, y: yb(d) + yb.bandwidth() / 2 + 4, 'text-anchor': 'end' }, svg).textContent = d.slice(0, 3));
+    d3.range(24).forEach((hr) => { if (hr % 3 === 0) svgEl('text', { x: x(hr) + x.bandwidth() / 2, y: H - 6, 'text-anchor': 'middle' }, svg).textContent = d3.format('02')(hr); });
+    const tip = tooltip(el);
+    h.forEach((d) => {
+      const c = svgEl('rect', { x: x(d.hour_of_day), y: yb(d.day_name), width: x.bandwidth(), height: yb.bandwidth(), fill: dash.colors[0], 'fill-opacity': 0.06 + 0.94 * d.incidents / mx, rx: 2 }, svg);
+      c.addEventListener('pointermove', (ev) => { const eb = el.getBoundingClientRect(); tip.show(d.day_name.charAt(0) + d.day_name.slice(1).toLowerCase() + ' ' + d3.format('02')(d.hour_of_day) + ':00', [fmt(d.incidents) + ' incidents', d3.format('.1f')(d.avg_delay_min) + ' min average delay'], ev.clientX - eb.left, ev.clientY - eb.top); });
+      c.addEventListener('pointerleave', () => tip.hide());
+    });
+  });
+
+  dash.draw('hourly', (el) => {
+    const h = rows('hourly_sum'); if (!h || !h.length) { dashT(el); return; }
+    el.replaceChildren();
+    const W = Math.max(el.clientWidth, 260), H = 200, mg = { t: 8, r: 6, b: 24, l: 6 };
+    const x = d3.scaleBand(h.map((d) => d.hour_of_day), [mg.l, W - mg.r]).padding(0.2), yy = d3.scaleLinear([0, d3.max(h, (d) => d.incidents)], [H - mg.b, mg.t]);
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Incidents by hour' }, el);
+    svgEl('line', { x1: mg.l, x2: W - mg.r, y1: H - mg.b, y2: H - mg.b, stroke: 'var(--cds-chart-axis)' }, svg);
+    const tip = tooltip(el);
+    const bars = h.map((d) => {
+      const r = svgEl('rect', { x: x(d.hour_of_day), y: yy(d.incidents), width: x.bandwidth(), height: H - mg.b - yy(d.incidents), fill: dash.colors[0], rx: 2 }, svg);
+      r.addEventListener('pointermove', (ev) => { bars.forEach((b) => b.setAttribute('opacity', b === r ? 1 : 0.55)); const eb = el.getBoundingClientRect(); tip.show(d3.format('02')(d.hour_of_day) + ':00', [fmt(d.incidents) + ' incidents', d3.format('.1f')(d.avg_delay_min) + ' min average delay'], ev.clientX - eb.left, ev.clientY - eb.top); });
+      r.addEventListener('pointerleave', () => { bars.forEach((b) => b.setAttribute('opacity', 1)); tip.hide(); });
+      return r;
+    });
+    h.forEach((d) => { if (d.hour_of_day % 3 === 0) svgEl('text', { x: x(d.hour_of_day) + x.bandwidth() / 2, y: H - 8, 'text-anchor': 'middle' }, svg).textContent = d3.format('02')(d.hour_of_day); });
+  });
+})();
+</script>
+
+</body></html>

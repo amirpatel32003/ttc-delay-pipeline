@@ -1,0 +1,43 @@
+name: Dashboard
+on:
+  schedule:
+    - cron: "17 11 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["docs/dashboard/**", "src/ttc_pipeline/export.py", ".github/workflows/dashboard.yml"]
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Load the City's data, build the warehouse and run the quality checks
+        run: PYTHONPATH=src python -m ttc_pipeline.cli run
+      - name: Export the dashboard data
+        run: |
+          PYTHONPATH=src python -m ttc_pipeline.cli export --out site/dashboard_data.json
+          cp docs/dashboard/index.html site/index.html
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
