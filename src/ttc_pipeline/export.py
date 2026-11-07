@@ -15,6 +15,23 @@ import duckdb
 from . import quality
 
 
+# Cause groups: first matching rule wins. Keyword rules on the City's own description text, so the
+# grouping is indicative and is not an official TTC classification. Order matters.
+CAUSE_GROUPS = [
+    ("Weather", r"WEATHER|ICE/SNOW|SNOW|FORCE MAJEURE"),
+    ("Customer, safety and security", r"INJURED|ILL CUSTOMER|CONTACT WITH PERSON|PRIORITY ONE|PAA|EAS ACTIVATED|UNAUTHORIZED|PATRON|ASSAULT|ASSUALT|SECURITY|POLICE|BOMB|SUSPICIOUS|GRAFFITI|FIRE/SMOKE|CUSTOMER|PASSENGER|EMERGENCY"),
+    ("Operations and staffing", r"OPERATOR|SUPERVISORY|TRANSIT CONTROL|TOWER|SCHEDULE|CLERK|OPTO|OVERSHOT|OVERSPEED|CREW|TRANSPORTATION OTHER|VIOLATED"),
+    ("Track, signals and power", r"SIGNAL|TRACK|SWITCH|RAIL|TRACTION|POWER|ATC|WORK ZONE|STRUCTURE|ELECTRICAL|INSULATED|LOOP|VOBC|TRAIN CONTROL|VOLTAGE|PLANT|RADIO|AXLE|COMMUNICATION|VCC"),
+    ("Trains and doors", r"DOOR|BRAKE|PROPULSION|TRUCK|AIR CONDITIONING|BODY|VEHICLE|EQUIPMENT|RC&S|YARD|ROCKET CAB|CARHOUSE|COUPL|WHEEL"),
+]
+OTHER_GROUP = "Other and unclassified"
+
+
+def group_case(col: str = "description") -> str:
+    whens = " ".join(f"WHEN regexp_matches(upper({col}), '{rx}') THEN '{name}'" for name, rx in CAUSE_GROUPS)
+    return f"CASE {whens} ELSE '{OTHER_GROUP}' END"
+
+
 def _rows(con: duckdb.DuckDBPyConnection, sql: str) -> list[dict]:
     cur = con.execute(sql)
     cols = [d[0] for d in cur.description]
@@ -81,6 +98,23 @@ def build_payload(con: duckdb.DuckDBPyConnection) -> dict:
                count(*) FILTER (WHERE {cur}) cur_inc, coalesce(sum(min_delay) FILTER (WHERE {cur}), 0) cur_min,
                count(*) FILTER (WHERE {prev}) prev_inc, coalesce(sum(min_delay) FILTER (WHERE {prev}), 0) prev_min
         FROM silver_delays GROUP BY 1 ORDER BY cur_min DESC""")
+    grp = group_case("coalesce(c.description, 'Unknown code')")
+    out["group_year"] = _rows(con, f"""
+        SELECT year(s.delay_date) yr, {grp} AS grp, count(*) incidents, sum(s.min_delay) AS minutes
+        FROM silver_delays s LEFT JOIN dim_codes c ON c.code = s.code GROUP BY 1, 2 ORDER BY 1, 2""")
+    out["group_ltm"] = _rows(con, f"""
+        SELECT {grp} AS grp,
+               count(*) FILTER (WHERE {cur}) cur_inc, coalesce(sum(min_delay) FILTER (WHERE {cur}), 0) cur_min,
+               count(*) FILTER (WHERE {prev}) prev_inc, coalesce(sum(min_delay) FILTER (WHERE {prev}), 0) prev_min
+        FROM silver_delays s LEFT JOIN dim_codes c ON c.code = s.code GROUP BY 1 ORDER BY cur_min DESC""")
+    out["heat"] = _rows(con, """
+        SELECT day_name, hour(delay_time) AS hour_of_day, count(*) incidents, sum(min_delay) AS minutes
+        FROM silver_delays WHERE delay_time IS NOT NULL AND day_name IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')
+        GROUP BY 1, 2 ORDER BY 1, 2""")
+    out["no_time"] = con.execute("""SELECT count(*) FROM silver_delays
+        WHERE delay_time IS NULL OR day_name NOT IN ('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY')""").fetchone()[0]
+    out["daily"] = [[d.isoformat(), int(n), int(m)] for d, n, m in con.execute(
+        "SELECT delay_date, count(*), sum(min_delay) FROM silver_delays GROUP BY 1 ORDER BY 1").fetchall()]
     out["ingestion"] = _rows(con, "SELECT name, format, last_modified, rows, bytes, ingested_at FROM ingestion_log ORDER BY name")
     out["checks"] = [{"name": n, "passed": bool(ok), "detail": d} for n, ok, d in quality.run_checks(con)]
     return out

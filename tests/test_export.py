@@ -8,7 +8,7 @@ from ttc_pipeline.cli import load_codes
 from ttc_pipeline.sample import write_sample
 
 KEYS = {"asof", "generated_at", "kpi", "yearly", "monthly", "stations", "hourly", "lines", "line_year", "buckets",
-        "causes", "cause_year", "watch", "causes_ltm", "line_ltm", "ingestion", "checks"}
+        "causes", "cause_year", "watch", "causes_ltm", "line_ltm", "ingestion", "checks", "group_year", "group_ltm", "heat", "no_time", "daily"}
 
 
 @pytest.fixture()
@@ -47,3 +47,21 @@ def test_write_payload_creates_file(payload, tmp_path):
     _, con = payload
     path = export.write_payload(con, tmp_path / "out" / "dashboard_data.json")
     assert json.loads(path.read_text())["asof"]
+
+
+def test_groups_heat_and_daily_reconcile_to_totals(payload):
+    data, con = payload
+    n = con.execute("SELECT count(*) FROM silver_delays").fetchone()[0]
+    minutes = con.execute("SELECT sum(min_delay) FROM silver_delays").fetchone()[0]
+    assert sum(r["incidents"] for r in data["group_year"]) == n
+    assert sum(r["minutes"] for r in data["group_year"]) == minutes
+    assert sum(r["incidents"] for r in data["heat"]) + data["no_time"] == n
+    assert sum(d[1] for d in data["daily"]) == n
+    assert sum(d[2] for d in data["daily"]) == minutes
+    assert sum(r["total_delay_min"] for r in data["monthly"]) == minutes
+
+
+def test_every_description_gets_exactly_one_group():
+    from ttc_pipeline.export import CAUSE_GROUPS, OTHER_GROUP
+    names = [n for n, _ in CAUSE_GROUPS] + [OTHER_GROUP]
+    assert len(names) == len(set(names))
