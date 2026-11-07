@@ -6,15 +6,15 @@
 <style>
 :root { color-scheme: light dark;
   --font-anthropic-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --font-anthropic-serif: Georgia, "Times New Roman", serif;
-  --bg: #f7f7f5; --color-panel: #ffffff; --color-border-line: #e3e2dc; --color-fg: #1f1e1b; --color-fg-muted: #6b6a63;
+  --bg: #f4f4f2; --color-panel: #ffffff; --color-border-line: #e3e2dc; --color-fg: #1f1e1b; --color-fg-muted: #6b6a63;
   --color-ok: #1f7a4d; --color-bad: #b3402a; --cds-chart-grid: #e8e7e1; --cds-chart-axis: #b9b8b0;
   --cds-surface-popover: #ffffff; --cds-border: #d6d5cd; --cds-shadow-popover: 0 4px 14px rgba(0,0,0,.12); --cds-text-secondary: #6b6a63;
-  --c0: #3b6ea8; --c1: #d9822b; --c2: #3f9275; --c3: #8a5fb0; --c4: #b5524a; --c5: #8a8a82;
+  --c0: #DA291C; --c1: #3d4a57; --c2: #00853F; --c3: #E0A800; --c4: #0082C8; --c5: #8a8a82;
   --color-bg: var(--bg); --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 22px; --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-lg: 18px; --cds-radius: 10px;
   --cds-font-size-title: 30px; --cds-font-size-heading: 16px; --cds-font-size-caption: 13px; --cds-font-size-body: 15px; --cds-font-weight-medium: 600; --dash-gutter: clamp(12px, 3vw, 28px); }
 @media (prefers-color-scheme: dark) { :root { --bg: #161614; --color-panel: #1f1f1c; --color-border-line: #33332e; --color-fg: #ecebe6; --color-fg-muted: #a3a29a;
   --color-ok: #5fcf9a; --color-bad: #f08a72; --cds-chart-grid: #2d2d29; --cds-chart-axis: #55554f; --cds-surface-popover: #26261f; --cds-border: #45453d; --cds-text-secondary: #a3a29a;
-  --c0: #6ea8e0; --c1: #f0a050; --c2: #6cc3a0; --c3: #b793d8; --c4: #e08a80; --c5: #a3a29a; } }
+  --c0: #ff5a4d; --c1: #9fb0c0; --c2: #3dbb78; --c3: #f2c14e; --c4: #4fb3e8; --c5: #a3a29a; } }
 html { background: var(--bg); } body { margin: 0; padding: var(--dash-gutter); background: var(--bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); }
 a { color: inherit; }
 
@@ -86,6 +86,18 @@ a { color: inherit; }
 .ttc .fres .cell .big { font-family: var(--font-anthropic-serif); font-size: 26px; font-variant-numeric: tabular-nums; }
 .ttc .reveal { margin: 12px 0 0; line-height: 1.5; max-width: 80ch; }
 @media (prefers-reduced-motion: reduce) { .ttc * { scroll-behavior: auto !important; } }
+.ttc { --ttc-red: #DA291C; }
+@media (prefers-color-scheme: dark) { .ttc { --ttc-red: #ff5a4d; } }
+.ttc .hero { background: #1b1b1b; color: #f4f4f2; border-radius: 12px; border-top: 6px solid var(--ttc-red); padding: 26px clamp(18px,4vw,40px) 22px; margin-top: 2px; }
+.ttc .hero .kick { color: #ff8a7f; font-weight: 600; }
+.ttc .hero h1 { color: #fff; }
+.ttc .hero .herosub { color: #d8d8d4; }
+.ttc .hero .sub, .ttc .hero .sub a { color: #b9b9b4; }
+.ttc .chap .ck { color: var(--ttc-red); font-weight: 700; }
+.ttc .chap { border-left: 4px solid var(--ttc-red); padding-left: 16px; }
+.ttc .chapnav a.on { background: var(--ttc-red); border-color: var(--ttc-red); color: #fff; }
+.ttc .card { border-top: 2px solid var(--color-border-line); }
+.ttc .asks li { margin: 6px 0; line-height: 1.5; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
 </style>
@@ -275,6 +287,12 @@ a { color: inherit; }
   <section class="card">
     <h2>Next: connecting delays to ridership and to buses and streetcars</h2>
     <p class="note" style="margin:0">Minutes here are not adjusted for how many people ride. The TTC publishes annual boardings by mode and weekday boardings by line on its operating statistics pages, and the City's open data portal carries bus and streetcar delay data in a similar format. The plan is to add both, so delay can be read per rider and across modes.</p>
+  </section>
+
+  <section class="card">
+    <h2>Three questions worth putting to the TTC</h2>
+    <p class="note">Drawn from the numbers above. They are questions, not conclusions: the data shows where minutes go, and only TTC management, its Board and the City can say why and what to do.</p>
+    <ol class="asks" data-draw="asks" data-source="heat group_ltm watch"></ol>
   </section>
 
   <section class="card">
@@ -538,10 +556,10 @@ const dash = (() => {
     years.forEach((v, i) => { if (i % 2 === 0) svgEl('text', { x: x(v), y: H - 8, 'text-anchor': 'middle' }, svg).textContent = String(v); });
     names.forEach((n, i) => {
       const pts = r.filter((d) => d.line === n).sort((a, b) => a.yr - b.yr);
-      svgEl('path', { d: d3.line().x((d) => x(d.yr)).y((d) => yy(d.total_delay_min))(pts), fill: 'none', stroke: dash.colors[i], 'stroke-width': 2 }, svg);
+      svgEl('path', { d: d3.line().x((d) => x(d.yr)).y((d) => yy(d.total_delay_min))(pts), fill: 'none', stroke: lineCol(names[i], i), 'stroke-width': 2 }, svg);
     });
     const key = el$('div', 'keys');
-    key.append(...names.map((n, i) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = dash.colors[i]; k.append(s, LINE[n]); return k; }));
+    key.append(...names.map((n, i) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = lineCol(n, i); k.append(s, LINE[n]); return k; }));
     el.insertBefore(key, el.firstChild);
     const tip = tooltip(el);
     const over = svgEl('rect', { x: mg.l, y: mg.t, width: W - mg.l - mg.r, height: H - mg.b - mg.t, fill: 'transparent' }, svg);
@@ -576,6 +594,7 @@ const dash = (() => {
   const scalar = (id) => { const r = rows(id); if (r == null) return null; if (typeof r === 'number') return r; return r[0] ? r[0].value : null; };
   const GROUPS = ['Customer, safety and security', 'Operations and staffing', 'Track, signals and power', 'Trains and doors', 'Weather', 'Other and unclassified'];
   const gcol = (g) => (g === 'Other and unclassified' ? 'var(--color-fg-muted)' : dash.colors[GROUPS.indexOf(g)]);
+  const LINEC = { YU: '#E0A800', BD: '#00853F', SRT: '#0082C8', SHP: '#A12C8F' }; const lineCol = (n, i) => LINEC[n] || dash.colors[i];
   const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
   const dayName = (d) => d.charAt(0) + d.slice(1).toLowerCase();
   const hh = (h) => d3.format('02')(h) + ':00';
@@ -884,6 +903,18 @@ const dash = (() => {
       li('The costliest hour of the week is ', B(dayName(c.day_name) + ' at ' + hh(c.hour_of_day)), ', not a weekday rush hour.')
     );
   });
+
+  dash.draw('asks', (ol) => {
+    const h = rows('heat'), g = rows('group_ltm'), w = rows('watch'); if (!h || !h.length || !g || !g.length || !w || !w.length) { ol.replaceChildren(el$('li', null, '—')); return; }
+    const c = h.slice().sort((a, b) => b.minutes - a.minutes)[0], tot = d3.sum(g, (d) => d.cur_min), s = g.filter((d) => d.grp !== 'Other and unclassified')[0], st = w[0];
+    const li = (t) => el$('li', null, t);
+    ol.replaceChildren(
+      li('What happens at ' + hh(c.hour_of_day) + ' on ' + dayName(c.day_name) + 's? It has cost ' + fmt(c.minutes) + ' delay minutes since 2014, more than any weekday rush hour.'),
+      li(s.grp + ' accounts for ' + Math.round(100 * s.cur_min / tot) + '% of delay minutes in the last 12 months. What would it take to cut that share, and how would the TTC know it worked?'),
+      li(title2(st.station) + ' leads the last 12 months watchlist with ' + fmt(st.cur_min) + ' minutes. Which stations get a published action plan, and where can riders follow progress?')
+    );
+  });
+  function title2(s) { return s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()); }
 })();
 </script>
 
