@@ -97,6 +97,12 @@ a { color: inherit; }
 .ttc .chap { border-left: 4px solid var(--ttc-red); padding-left: 16px; }
 .ttc .chapnav a.on { background: var(--ttc-red); border-color: var(--ttc-red); color: #fff; }
 .ttc .card { border-top: 2px solid var(--color-border-line); }
+.ttc .adv { display: none; }
+.ttc:has(#fulldetail:checked) .adv { display: revert; }
+.ttc:has(#fulldetail:checked) section.adv.grid { display: grid; }
+.ttc label.mode { display: flex; gap: 10px; align-items: flex-start; margin-top: 12px; padding: 10px 12px; border: 1px solid var(--color-border-line); border-radius: 8px; cursor: pointer; }
+.ttc label.mode input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ttc-red); }
+.ttc .mnote { display: block; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 .ttc .asks li { margin: 6px 0; line-height: 1.5; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
@@ -115,13 +121,9 @@ a { color: inherit; }
   <nav class="chapnav" data-draw="chapnav" data-source="kpi" aria-label="Chapters"></nav>
 
   <section class="card start" aria-label="How to read this page">
-    <h2>Start here: what a "delay" is in this data</h2>
-    <p>Every time the TTC logs a subway delay, the City of Toronto publishes one row: the date and time, the station, the line, a cause code and how many minutes trains were held up. This page adds those rows up. It covers every month from January 2014 to the latest data.</p>
-    <div class="cols">
-      <div><h3>If you ride the subway</h3><p>The heat maps show which days and hours collect the most delays, and the calendar shows how bad any single day was. Most logged delays are short; a small number of long ones account for much of the lost time.</p></div>
-      <div><h3>If you run or fund the system</h3><p>The cause groups, station list and line comparison show where time is lost and what kind of problem it was. A section near the end sets out where decisions could focus. Those decisions belong to TTC management, its Board and the City.</p></div>
-      <div><h3>How to read the numbers</h3><p>Minutes are train delay minutes as logged, not minutes lost by each rider, and many incidents log zero minutes. Nothing here is adjusted for how many people ride. A numbers check at the bottom re-adds every total from the raw tables on each refresh.</p></div>
-    </div>
+    <h2>In plain English</h2>
+    <p>Each time a subway train is held up, the TTC logs it and the City of Toronto publishes it. This page adds up every one since January 2014 and shows when, where and why. <b>Minutes</b> here means minutes trains were held up, not minutes lost by each rider.</p>
+    <label class="mode" for="fulldetail"><input type="checkbox" id="fulldetail"> <span><b>Show full detail</b> <span class="mnote">Off: the short version, about five minutes. On: every table and chart, for analysts.</span></span></label>
   </section>
 
   <div class="chap" id="ch-1"><div class="ck">Chapter 1 of 7</div><h2 class="cq">How big is the problem?</h2><p class="ca" data-draw="ans_1" data-source="monthly">—</p></div>
@@ -177,13 +179,13 @@ a { color: inherit; }
     <div data-draw="calendar" data-source="daily">—</div>
   </section>
 
-  <section class="card">
+  <section class="card adv">
     <h2>Month by year</h2>
     <p class="note">Minutes of delay in each month. Darker means more.</p>
     <div class="tbl"><table data-draw="myheat" data-source="monthly"></table></div>
   </section>
 
-  <section class="card">
+  <section class="card adv">
     <h2>Incidents by hour</h2>
     <p class="note">All days and years together.</p>
     <div class="chart short" data-draw="hourly" data-source="hourly_sum">—</div>
@@ -211,7 +213,7 @@ a { color: inherit; }
     </div>
   </section>
 
-  <section class="card">
+  <section class="card adv">
     <h2>Station watchlist, last 12 months</h2>
     <p class="note">The 15 stations with the most delay minutes, against the 12 months before. Large swings can come from one or two long incidents, so read minutes per incident alongside the change.</p>
     <div class="tbl"><table><thead><tr><th>Station</th><th>Minutes lost</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">Min / incident</th></tr></thead><tbody data-draw="watch_body" data-source="watch"></tbody></table></div>
@@ -232,7 +234,7 @@ a { color: inherit; }
     </div>
   </section>
 
-  <section class="grid">
+  <section class="grid adv">
     <div class="card">
       <h2>Top causes, last 12 months</h2>
       <p class="note">Delay codes as published, ranked by minutes lost.</p>
@@ -240,7 +242,7 @@ a { color: inherit; }
     </div>
   </section>
 
-  <section class="card">
+  <section class="card adv">
     <h2>Largest causes over time</h2>
       <p class="note">Minutes per year for the six causes with the most minutes overall. Darker cells are that cause's worst years.</p>
       <div class="tbl"><table data-draw="cause_matrix" data-source="cause_year"></table></div>
@@ -255,7 +257,7 @@ a { color: inherit; }
     <ul class="ev" data-draw="decide" data-source="group_ltm watch monthly heat buckets"></ul>
   </section>
 
-  <section class="card">
+  <section class="card adv">
     <h2>Levers an operator could evaluate, by cause group</h2>
     <p class="note">Minutes are for the last 12 months. The levers are common areas of action in transit operations; this data does not test any of them.</p>
     <div class="tbl"><table><thead><tr><th>Cause group</th><th class="n">Minutes</th><th class="n">Share</th><th>Areas to evaluate</th></tr></thead><tbody data-draw="levers_body" data-source="group_ltm"></tbody></table></div>
@@ -269,7 +271,7 @@ a { color: inherit; }
   <a class="nxt" href="#ch-7" data-go="ch-7">Next: can you trust these numbers? &darr;</a>
 
   <div class="chap" id="ch-7"><div class="ck">Chapter 7 of 7</div><h2 class="cq">Can you trust these numbers?</h2><p class="ca" data-draw="ans_7" data-source="kpi yearly monthly daily heat buckets group_year lines no_time">—</p></div>
-  <section class="card">
+  <section class="card adv">
     <h2>Data quality and sources</h2>
     <p class="note">Every build of the pipeline runs these checks and loads each source file once; a file whose last-modified time is unchanged is skipped.</p>
     <div class="grid">
@@ -809,7 +811,7 @@ const dash = (() => {
   dash.draw('hero_p', (el) => {
     const m = rows('monthly'), h = rows('heat'); if (!m || m.length < 24 || !h || !h.length) { dashT(el); return; }
     const w = windows(m);
-    el.textContent = 'That is about ' + fmt(Math.round(w.minL / 365)) + ' minutes of delay every day. Scroll to see when and where it happens, why, and what could change it. One hour of the week may surprise you.';
+    el.textContent = 'That is about ' + fmt(Math.round(w.minL / 1440)) + ' days of trains held up, non-stop, or ' + fmt(Math.round(w.minL / 365)) + ' minutes every day. Scroll to see when and where it happens, why, and what could change it. One hour of the week may surprise you.';
   });
   dash.draw('chapnav', (nav) => {
     nav.replaceChildren(...CHAPS.map(([id, lab], i) => { const a = el$('a', null, (i + 1) + ' ' + lab); a.href = '#' + id; a.setAttribute('data-go', id); return a; }));
@@ -915,6 +917,8 @@ const dash = (() => {
     );
   });
   function title2(s) { return s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()); }
+
+  document.addEventListener('change', (ev) => { if (ev.target && ev.target.id === 'fulldetail') { window.dispatchEvent(new Event('resize')); setTimeout(() => window.dispatchEvent(new Event('resize')), 150); } });
 })();
 </script>
 
