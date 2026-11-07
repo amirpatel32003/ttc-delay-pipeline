@@ -128,6 +128,9 @@ a { color: inherit; }
   .ttc .chap { break-after: avoid; }
   .ttc svg { max-width: 100%; }
 }
+.ttc .hero { position: relative; }
+.ttc button.pdfbtn { position: absolute; top: 14px; right: 14px; }
+@media (max-width: 560px) { .ttc button.pdfbtn { position: static; margin-bottom: 10px; } }
 .ttc .asks li { margin: 6px 0; line-height: 1.5; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
@@ -137,11 +140,11 @@ a { color: inherit; }
 
 <div class="ttc">
   <header class="hero">
+    <button type="button" class="pdfbtn" id="pdfbtn" aria-label="Save this report as a PDF" onclick="var b=this,t=b.textContent;try{window.print()}catch(e){}b.textContent='Or press Ctrl+P / Cmd+P, then Save as PDF';setTimeout(function(){b.textContent=t},5000)">Save as PDF</button>
     <div class="kick">TTC subway delays, January 2014 to today</div>
     <h1 data-draw="hero_h" data-source="monthly">—</h1>
     <p class="herosub" data-draw="hero_p" data-source="monthly heat">—</p>
-    <p class="by"><b>Created by Amir Patel</b><span>Toronto</span><a href="https://amirpatel.netlify.app">Portfolio</a><a href="https://www.linkedin.com/in/connect-amir">LinkedIn</a><a href="https://github.com/amirpatel32003/ttc-delay-pipeline">GitHub</a><button type="button" class="pdfbtn" onclick="window.print()">Save as PDF</button></p>
-    <p class="sub">Data through <span data-draw="asof" data-source="kpi">—</span> &middot; City of Toronto Open Data, TTC Subway Delay Data &middot; refreshed <span data-generated>—</span> &middot; independent analysis, not an official TTC report &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
+    <p class="sub">Data through <span data-draw="asof" data-source="kpi">—</span> &middot; City of Toronto Open Data, TTC Subway Delay Data &middot; refreshed <span data-generated>—</span> &middot; independent analysis by Amir Patel, not an official TTC report &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
   </header>
   <div class="prog" data-draw="progress" data-source="kpi"></div>
   <nav class="chapnav" data-draw="chapnav" data-source="kpi" aria-label="Chapters"></nav>
@@ -331,8 +334,7 @@ a { color: inherit; }
 
   <section class="card author">
     <h2>About this project</h2>
-    <p>Created by <b>Amir Patel</b>, Toronto. I build data pipelines and dashboards with Python and SQL. This one loads every TTC subway delay the City publishes, checks it, and turns it into the page you just read.</p>
-    <p><a href="https://amirpatel.netlify.app">Portfolio</a> &middot; <a href="https://www.linkedin.com/in/connect-amir">LinkedIn</a> &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">Source code on GitHub</a>. Corrections and ideas are welcome. This is independent work, not an official TTC product.</p>
+    <p>Built by Amir Patel in Toronto with Python and SQL from the City's open data. Independent work, not an official TTC product. Corrections and ideas are welcome: <a href="https://www.linkedin.com/in/connect-amir">LinkedIn</a> &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a>.</p>
   </section>
 
   <details>
