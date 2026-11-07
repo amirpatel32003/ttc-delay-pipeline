@@ -108,13 +108,15 @@ def read_resource(content: bytes, fmt: str) -> pd.DataFrame:
 
 
 def _fix_mojibake(text):
-    """The published code CSV contains UTF-8 text that was decoded as cp1252 once ('â\x80\x93' for an en dash)."""
+    """The published code CSV holds UTF-8 text that was decoded as latin-1/cp1252 once ('â\x80\x93' for an en dash)."""
     if not isinstance(text, str):
         return text
-    try:
-        return text.encode("cp1252").decode("utf-8")
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        return text
+    for codec in ("latin-1", "cp1252"):
+        try:
+            return text.encode(codec).decode("utf-8")
+        except (UnicodeEncodeError, UnicodeDecodeError):
+            continue
+    return text
 
 
 def read_codes(content: bytes, fmt: str) -> pd.DataFrame:

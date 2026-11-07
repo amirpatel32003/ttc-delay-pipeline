@@ -107,6 +107,8 @@ def test_code_descriptions_mojibake_is_repaired():
 
     broken = ("CODE,DESCRIPTION\nMUI,INJURED CUSTOMER \u00e2\u20ac\u201c TRANSPORTED\n").encode("utf-8")
     assert ingest.read_codes(broken, "csv").loc[0, "description"] == "INJURED CUSTOMER \u2013 TRANSPORTED"
+    latin1 = "CODE,DESCRIPTION\nMUI,INJURED CUSTOMER \u2013 TRANSPORTED\n".encode("utf-8").decode("latin-1").encode("utf-8")
+    assert ingest.read_codes(latin1, "csv").loc[0, "description"] == "INJURED CUSTOMER \u2013 TRANSPORTED"
     assert ingest.read_codes(b"CODE,DESCRIPTION\nA,PLAIN TEXT\n", "csv").loc[0, "description"] == "PLAIN TEXT"
 
 
