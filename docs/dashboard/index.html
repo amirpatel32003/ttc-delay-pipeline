@@ -106,6 +106,9 @@ a { color: inherit; }
 .ttc .by { margin: 14px 0 0; font-size: var(--cds-font-size-caption); color: #e9e9e5; display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; }
 .ttc .by b { color: #fff; font-size: 1.05em; }
 .ttc .by a { color: #ffb3ab; }
+.ttc a.pdfbtn { font: inherit; font-size: var(--cds-font-size-caption); padding: 5px 12px; border-radius: 999px; border: 1px solid #ffffff55; background: transparent; color: #fff; text-decoration: none; display: inline-block; }
+.ttc a.pdfbtn:hover { background: #ffffff22; }
+.ttc a.pdfbtn { position: absolute; top: 14px; right: 14px; }
 .ttc button.pdfbtn { font: inherit; font-size: var(--cds-font-size-caption); padding: 5px 12px; border-radius: 999px; border: 1px solid #ffffff55; background: transparent; color: #fff; cursor: pointer; }
 .ttc button.pdfbtn:hover { background: #ffffff22; }
 .ttc .author { display: flex; flex-direction: column; gap: 6px; }
@@ -121,16 +124,17 @@ a { color: inherit; }
   html, body { background: #fff !important; padding: 0 !important; }
   .ttc { gap: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   .ttc .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .ttc .prog, .ttc .chapnav, .ttc label.mode, .ttc a.nxt, .ttc button.pdfbtn, .ttc input.srch { display: none !important; }
+  .ttc .prog, .ttc .chapnav, .ttc label.mode, .ttc a.nxt, .ttc button.pdfbtn, .ttc a.pdfbtn, .ttc input.srch { display: none !important; }
   .ttc .adv { display: revert !important; }
   .ttc section.adv.grid { display: grid !important; }
   .ttc .card, .ttc .tile, .ttc .chap { break-inside: avoid; }
   .ttc .chap { break-after: avoid; }
+  .ttc #ch-2, .ttc #ch-3, .ttc #ch-4, .ttc #ch-5, .ttc #ch-6, .ttc #ch-7 { break-before: page; }
   .ttc svg { max-width: 100%; }
 }
 .ttc .hero { position: relative; }
 .ttc button.pdfbtn { position: absolute; top: 14px; right: 14px; }
-@media (max-width: 560px) { .ttc button.pdfbtn { position: static; margin-bottom: 10px; } }
+@media (max-width: 560px) { .ttc a.pdfbtn { position: static; margin-bottom: 10px; } }
 .ttc .asks li { margin: 6px 0; line-height: 1.5; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
@@ -140,7 +144,7 @@ a { color: inherit; }
 
 <div class="ttc">
   <header class="hero">
-    <button type="button" class="pdfbtn" id="pdfbtn" aria-label="Save this report as a PDF" onclick="var b=this,t=b.textContent;try{window.print()}catch(e){}b.textContent='Or press Ctrl+P / Cmd+P, then Save as PDF';setTimeout(function(){b.textContent=t},5000)">Save as PDF</button>
+    <a class="pdfbtn" id="pdfbtn" href="ttc-delay-report.pdf" download="TTC-subway-delays-report.pdf" aria-label="Download this report as a PDF">Download PDF report</a>
     <div class="kick">TTC subway delays, January 2014 to today</div>
     <h1 data-draw="hero_h" data-source="monthly">—</h1>
     <p class="herosub" data-draw="hero_p" data-source="monthly heat">—</p>

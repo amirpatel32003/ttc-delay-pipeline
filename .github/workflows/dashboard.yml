@@ -29,6 +29,24 @@ jobs:
         run: |
           PYTHONPATH=src python -m ttc_pipeline.cli export --out site/dashboard_data.json
           cp docs/dashboard/index.html site/index.html
+      - name: Render the downloadable PDF report
+        run: |
+          pip install playwright
+          playwright install --with-deps chromium
+          (cd site && python -m http.server 8000 &)
+          sleep 2
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          with sync_playwright() as p:
+              b = p.chromium.launch()
+              pg = b.new_page(viewport={"width": 1100, "height": 900})
+              pg.goto("http://localhost:8000/index.html")
+              pg.wait_for_selector("[data-draw=audit_body] tr")
+              pg.wait_for_timeout(3000)
+              pg.emulate_media(media="print")
+              pg.pdf(path="site/ttc-delay-report.pdf", format="A4", print_background=True, prefer_css_page_size=True)
+              b.close()
+          PY
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
