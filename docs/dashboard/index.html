@@ -9,12 +9,12 @@
   --bg: #f7f7f5; --color-panel: #ffffff; --color-border-line: #e3e2dc; --color-fg: #1f1e1b; --color-fg-muted: #6b6a63;
   --color-ok: #1f7a4d; --color-bad: #b3402a; --cds-chart-grid: #e8e7e1; --cds-chart-axis: #b9b8b0;
   --cds-surface-popover: #ffffff; --cds-border: #d6d5cd; --cds-shadow-popover: 0 4px 14px rgba(0,0,0,.12); --cds-text-secondary: #6b6a63;
-  --c0: #3b6ea8; --c1: #d9822b; --c2: #3f9275; --c3: #8a5fb0;
+  --c0: #3b6ea8; --c1: #d9822b; --c2: #3f9275; --c3: #8a5fb0; --c4: #b5524a; --c5: #8a8a82;
   --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 22px; --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-lg: 18px; --cds-radius: 10px;
   --cds-font-size-title: 30px; --cds-font-size-heading: 16px; --cds-font-size-caption: 13px; --cds-font-size-body: 15px; --cds-font-weight-medium: 600; --dash-gutter: clamp(12px, 3vw, 28px); }
 @media (prefers-color-scheme: dark) { :root { --bg: #161614; --color-panel: #1f1f1c; --color-border-line: #33332e; --color-fg: #ecebe6; --color-fg-muted: #a3a29a;
   --color-ok: #5fcf9a; --color-bad: #f08a72; --cds-chart-grid: #2d2d29; --cds-chart-axis: #55554f; --cds-surface-popover: #26261f; --cds-border: #45453d; --cds-text-secondary: #a3a29a;
-  --c0: #6ea8e0; --c1: #f0a050; --c2: #6cc3a0; --c3: #b793d8; } }
+  --c0: #6ea8e0; --c1: #f0a050; --c2: #6cc3a0; --c3: #b793d8; --c4: #e08a80; --c5: #a3a29a; } }
 html { background: var(--bg); } body { margin: 0; padding: var(--dash-gutter); background: var(--bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); }
 a { color: inherit; }
 
@@ -55,6 +55,17 @@ a { color: inherit; }
 .ttc details { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); line-height: 1.5; }
 .ttc details summary { cursor: pointer; color: var(--color-fg); }
 .ttc details p { margin: 6px 0; max-width: 85ch; }
+.ttc .tog { border: 1px solid var(--color-border-line); background: transparent; color: var(--color-fg-muted); border-radius: 999px; padding: 3px 11px; font: inherit; font-size: var(--cds-font-size-caption); cursor: pointer; }
+.ttc .tog.on { background: var(--color-fg); color: var(--color-panel); border-color: var(--color-fg); }
+.ttc .tog:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.ttc .start p { margin: 6px 0 0; line-height: 1.55; max-width: 90ch; }
+.ttc .start .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr)); gap: var(--cds-gap-md); margin-top: 10px; }
+.ttc .start h3 { margin: 0; font-size: var(--cds-font-size-caption); font-weight: var(--cds-font-weight-medium); color: var(--color-fg-muted); }
+.ttc .start .cols p { margin: 4px 0 0; }
+.ttc .say { border-left: 3px solid var(--color-fg-muted); padding: 2px 0 2px 12px; margin: 0 0 var(--cds-gap-md); max-width: 85ch; line-height: 1.5; }
+.ttc ul.ev { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 8px; line-height: 1.5; max-width: 95ch; }
+.ttc td.wrap { white-space: normal; min-width: 14rem; color: var(--color-fg-muted); }
+.ttc .pass { color: var(--color-ok); } .ttc .fail { color: var(--color-bad); font-weight: 600; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
 </style>
@@ -66,6 +77,16 @@ a { color: inherit; }
     <h1>TTC subway service delays</h1>
     <p class="sub">Executive view &middot; data through <span data-draw="asof" data-source="kpi">—</span> &middot; City of Toronto Open Data, TTC Subway Delay Data &middot; refreshed <span data-generated>—</span> &middot; independent analysis, not an official TTC report &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
   </header>
+
+  <section class="card start" aria-label="How to read this page">
+    <h2>Start here: what a "delay" is in this data</h2>
+    <p>Every time the TTC logs a subway delay, the City of Toronto publishes one row: the date and time, the station, the line, a cause code and how many minutes trains were held up. This page adds those rows up. It covers every month from January 2014 to the latest data.</p>
+    <div class="cols">
+      <div><h3>If you ride the subway</h3><p>The heat maps show which days and hours collect the most delays, and the calendar shows how bad any single day was. Most logged delays are short; a small number of long ones account for much of the lost time.</p></div>
+      <div><h3>If you run or fund the system</h3><p>The cause groups, station list and line comparison show where time is lost and what kind of problem it was. A section near the end sets out where decisions could focus. Those decisions belong to TTC management, its Board and the City.</p></div>
+      <div><h3>How to read the numbers</h3><p>Minutes are train delay minutes as logged, not minutes lost by each rider, and many incidents log zero minutes. Nothing here is adjusted for how many people ride. A numbers check at the bottom re-adds every total from the raw tables on each refresh.</p></div>
+    </div>
+  </section>
 
   <section class="card brief" aria-label="Summary">
     <h2>What the data says</h2>
@@ -120,6 +141,19 @@ a { color: inherit; }
   <div class="sect">Why</div>
   <section class="grid">
     <div class="card">
+      <h2>What kind of problem, per year</h2>
+      <p class="note">Minutes of delay by cause group. Groups are built by matching words in the City's own cause descriptions, so treat them as a guide, not an official TTC classification.</p>
+      <div class="keys" id="gkey"></div>
+      <div class="chart short" data-draw="groups" data-source="group_year">—</div>
+    </div>
+    <div class="card">
+      <h2>Cause groups, last 12 months</h2>
+      <div class="tbl"><table><thead><tr><th>Group</th><th class="n">Minutes</th><th class="n">Share</th><th class="n">vs prior</th><th class="n">Incidents</th></tr></thead><tbody data-draw="group_body" data-source="group_ltm"></tbody></table></div>
+    </div>
+  </section>
+
+  <section class="grid">
+    <div class="card">
       <h2>Top causes, last 12 months</h2>
       <p class="note">Delay codes as published, ranked by minutes lost.</p>
       <div class="tbl"><table><thead><tr><th>Cause</th><th class="n">Minutes</th><th class="n">vs prior</th><th class="n">Incidents</th></tr></thead><tbody data-draw="cause_body" data-source="causes_ltm"></tbody></table></div>
@@ -133,17 +167,46 @@ a { color: inherit; }
   </section>
 
   <div class="sect">When</div>
-  <section class="grid">
-    <div class="card">
-      <h2>Weekday and hour</h2>
-      <p class="note">Incidents by day of week and hour, 2014 to 2026 together. Darker means more.</p>
-      <div class="chart" data-draw="heat" data-source="hourly">—</div>
-    </div>
-    <div class="card">
-      <h2>Incidents by hour</h2>
-      <p class="note">All days together.</p>
-      <div class="chart" data-draw="hourly" data-source="hourly_sum">—</div>
-    </div>
+  <section class="card">
+    <h2>Delays by day of week and hour</h2>
+    <p class="note">Every delay since 2014, grouped by the day of the week and the hour it was logged. Switch between how many incidents there were, how many minutes they cost and how long the average one lasted. Sunday at 08:00 stands out in every year of the data; Sunday subway service begins around then, and the data does not say why that hour logs so many incidents.</p>
+    <div data-draw="heat" data-source="heat">—</div>
+  </section>
+
+  <section class="card">
+    <h2>Delays by date</h2>
+    <p class="note">One square per day, darker for more minutes of delay. Pick a year. Colours use the same scale across all years, so they can be compared; the darkest squares are the worst days on record.</p>
+    <div data-draw="calendar" data-source="daily">—</div>
+  </section>
+
+  <section class="card">
+    <h2>Month by year</h2>
+    <p class="note">Minutes of delay in each month. Darker means more.</p>
+    <div class="tbl"><table data-draw="myheat" data-source="monthly"></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Incidents by hour</h2>
+    <p class="note">All days and years together.</p>
+    <div class="chart short" data-draw="hourly" data-source="hourly_sum">—</div>
+  </section>
+
+  <div class="sect">Where decisions could focus</div>
+  <section class="card">
+    <h2>What this suggests, and who can act on it</h2>
+    <p class="say">The people who can change these numbers are the people who run and fund the subway: TTC management, its Board and the City of Toronto. They have the operating detail this public data lacks. The data shows where and when time is lost and what kind of problem it was. It cannot show which fix would work or what it would cost, so the options below are questions to evaluate, not recommendations.</p>
+    <ul class="ev" data-draw="decide" data-source="group_ltm watch monthly heat buckets"></ul>
+  </section>
+
+  <section class="card">
+    <h2>Levers an operator could evaluate, by cause group</h2>
+    <p class="note">Minutes are for the last 12 months. The levers are common areas of action in transit operations; this data does not test any of them.</p>
+    <div class="tbl"><table><thead><tr><th>Cause group</th><th class="n">Minutes</th><th class="n">Share</th><th>Areas to evaluate</th></tr></thead><tbody data-draw="levers_body" data-source="group_ltm"></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <h2>If you ride: when delays are most and least common</h2>
+    <ul class="ev" data-draw="riders" data-source="heat daily"></ul>
   </section>
 
   <section class="card">
@@ -153,6 +216,17 @@ a { color: inherit; }
       <div class="tbl"><table><thead><tr><th>Check</th><th>Result</th></tr></thead><tbody data-draw="checks_body" data-source="checks"></tbody></table></div>
       <div class="tbl"><table><thead><tr><th>Source file</th><th>Last modified</th><th class="n">Rows</th></tr></thead><tbody data-draw="ingest_body" data-source="ingestion"></tbody></table></div>
     </div>
+  </section>
+
+  <section class="card">
+    <h2>Numbers check</h2>
+    <p class="note">Re-computed in your browser from the tables on this page each time it loads. Each total should match the headline figure it came from; any mismatch shows in red.</p>
+    <div class="tbl"><table><thead><tr><th>Check</th><th class="n">Expected</th><th class="n">Found</th><th>Result</th></tr></thead><tbody data-draw="audit_body" data-source="kpi yearly monthly daily heat buckets group_year lines no_time"></tbody></table></div>
+  </section>
+
+  <section class="card">
+    <h2>Next: connecting delays to ridership and to buses and streetcars</h2>
+    <p class="note" style="margin:0">Minutes here are not adjusted for how many people ride. The TTC publishes annual boardings by mode and weekday boardings by line on its operating statistics pages, and the City's open data portal carries bus and streetcar delay data in a similar format. The plan is to add both, so delay can be read per rider and across modes.</p>
   </section>
 
   <details>
@@ -169,7 +243,7 @@ a { color: inherit; }
 const dash = (() => {
   const store = {}, calcs = [], draws = [];
   const api = {
-    colors: ['var(--c0)', 'var(--c1)', 'var(--c2)', 'var(--c3)'],
+    colors: ['var(--c0)', 'var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c5)'],
     data: (id) => (id in store ? { status: 'ok', data: store[id] } : { status: 'loading' }),
     calc: (id, spec) => calcs.push([id, spec]),
     draw: (name, fn) => draws.push([name, fn])
@@ -426,23 +500,6 @@ const dash = (() => {
   });
 
   // ---------- heatmap + hourly
-  dash.draw('heat', (el) => {
-    const h = rows('hourly'); if (!h || !h.length) { dashT(el); return; }
-    el.replaceChildren();
-    const W = Math.max(el.clientWidth, 280), mg = { t: 4, r: 4, b: 22, l: 34 }, rh = 24, H = mg.t + mg.b + rh * 7;
-    const x = d3.scaleBand(d3.range(24), [mg.l, W - mg.r]).padding(0.06), yb = d3.scaleBand(WK, [mg.t, H - mg.b]).padding(0.08);
-    const mx = d3.max(h, (d) => d.incidents);
-    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Incidents by weekday and hour' }, el);
-    WK.forEach((d) => svgEl('text', { x: mg.l - 4, y: yb(d) + yb.bandwidth() / 2 + 4, 'text-anchor': 'end' }, svg).textContent = d.slice(0, 3));
-    d3.range(24).forEach((hr) => { if (hr % 3 === 0) svgEl('text', { x: x(hr) + x.bandwidth() / 2, y: H - 6, 'text-anchor': 'middle' }, svg).textContent = d3.format('02')(hr); });
-    const tip = tooltip(el);
-    h.forEach((d) => {
-      const c = svgEl('rect', { x: x(d.hour_of_day), y: yb(d.day_name), width: x.bandwidth(), height: yb.bandwidth(), fill: dash.colors[0], 'fill-opacity': 0.06 + 0.94 * d.incidents / mx, rx: 2 }, svg);
-      c.addEventListener('pointermove', (ev) => { const eb = el.getBoundingClientRect(); tip.show(d.day_name.charAt(0) + d.day_name.slice(1).toLowerCase() + ' ' + d3.format('02')(d.hour_of_day) + ':00', [fmt(d.incidents) + ' incidents', d3.format('.1f')(d.avg_delay_min) + ' min average delay'], ev.clientX - eb.left, ev.clientY - eb.top); });
-      c.addEventListener('pointerleave', () => tip.hide());
-    });
-  });
-
   dash.draw('hourly', (el) => {
     const h = rows('hourly_sum'); if (!h || !h.length) { dashT(el); return; }
     el.replaceChildren();
@@ -458,6 +515,199 @@ const dash = (() => {
       return r;
     });
     h.forEach((d) => { if (d.hour_of_day % 3 === 0) svgEl('text', { x: x(d.hour_of_day) + x.bandwidth() / 2, y: H - 8, 'text-anchor': 'middle' }, svg).textContent = d3.format('02')(d.hour_of_day); });
+  });
+
+  const scalar = (id) => { const r = rows(id); if (r == null) return null; if (typeof r === 'number') return r; return r[0] ? r[0].value : null; };
+  const GROUPS = ['Customer, safety and security', 'Operations and staffing', 'Track, signals and power', 'Trains and doors', 'Weather', 'Other and unclassified'];
+  const gcol = (g) => (g === 'Other and unclassified' ? 'var(--color-fg-muted)' : dash.colors[GROUPS.indexOf(g)]);
+  const DAYS = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+  const dayName = (d) => d.charAt(0) + d.slice(1).toLowerCase();
+  const hh = (h) => d3.format('02')(h) + ':00';
+  const LEVERS = {
+    'Customer, safety and security': 'Station and platform presence, response procedures for track-level and medical incidents, platform edge protection, coordination with police and paramedics, passenger information',
+    'Operations and staffing': 'Operator availability and relief planning, scheduling, supervision and control-room procedures',
+    'Track, signals and power': 'Maintenance windows, renewal of ageing track and signal assets, completing signalling upgrades',
+    'Trains and doors': 'Fleet maintenance, door reliability, spare train availability',
+    'Weather': 'Winter readiness, de-icing and storm response plans',
+    'Other and unclassified': 'Review the cause codes that fall outside the groups above'
+  };
+
+  // ---------- heat map: weekday by hour, switchable measure
+  let heatMetric = 'incidents';
+  dash.draw('heat', (el) => {
+    const h = rows('heat'); if (!h || !h.length) { dashT(el); return; }
+    el.replaceChildren();
+    const M = { incidents: ['Incidents', (d) => d.incidents, fmt], minutes: ['Minutes of delay', (d) => d.minutes, fmt], avg: ['Average minutes per incident', (d) => (d.incidents ? d.minutes / d.incidents : 0), d3.format('.1f')] };
+    const bar = el$('div', 'keys'), wrap = el$('div', 'chart'); el.append(bar, wrap);
+    const btns = Object.entries(M).map(([k, [lab]]) => { const b = el$('button', 'tog', lab); b.type = 'button'; b.addEventListener('click', () => { heatMetric = k; render(); }); bar.append(b); return [k, b]; });
+    function render() {
+      btns.forEach(([k, b]) => { b.className = 'tog' + (k === heatMetric ? ' on' : ''); b.setAttribute('aria-pressed', String(k === heatMetric)); });
+      wrap.replaceChildren();
+      const [lab, f, nf] = M[heatMetric];
+      const W = Math.max(wrap.clientWidth, 300), mg = { t: 4, r: 4, b: 22, l: 38 }, rh = 30, H = mg.t + mg.b + rh * 7;
+      const x = d3.scaleBand(d3.range(24), [mg.l, W - mg.r]).padding(0.05), yb = d3.scaleBand(DAYS, [mg.t, H - mg.b]).padding(0.07);
+      const mx = d3.max(h, f);
+      const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': lab + ' by weekday and hour' }, wrap);
+      DAYS.forEach((d) => svgEl('text', { x: mg.l - 5, y: yb(d) + yb.bandwidth() / 2 + 4, 'text-anchor': 'end' }, svg).textContent = d.slice(0, 3));
+      d3.range(24).forEach((hr) => { if (hr % 2 === 0) svgEl('text', { x: x(hr) + x.bandwidth() / 2, y: H - 6, 'text-anchor': 'middle' }, svg).textContent = d3.format('02')(hr); });
+      const tip = tooltip(wrap);
+      h.forEach((d) => {
+        const c = svgEl('rect', { x: x(d.hour_of_day), y: yb(d.day_name), width: x.bandwidth(), height: yb.bandwidth(), fill: dash.colors[0], 'fill-opacity': 0.05 + 0.95 * f(d) / mx, rx: 2 }, svg);
+        c.addEventListener('pointermove', (ev) => { const eb = wrap.getBoundingClientRect(); tip.show(dayName(d.day_name) + ' ' + hh(d.hour_of_day), [fmt(d.incidents) + ' incidents', fmt(d.minutes) + ' minutes', d3.format('.1f')(d.incidents ? d.minutes / d.incidents : 0) + ' min per incident'], ev.clientX - eb.left, ev.clientY - eb.top); });
+        c.addEventListener('pointerleave', () => tip.hide());
+      });
+      const lg = el$('div', 'key'); lg.style.marginTop = '6px';
+      const sw = el$('span', 'sw'); sw.style.background = dash.colors[0]; sw.style.opacity = 0.15; const sw2 = el$('span', 'sw'); sw2.style.background = dash.colors[0];
+      lg.append(sw, document.createTextNode(' low  '), sw2, document.createTextNode(' high: ' + nf(mx) + ' (' + lab.toLowerCase() + ', busiest cell)'));
+      wrap.append(lg);
+    }
+    render();
+  });
+
+  // ---------- calendar by date
+  let calYear = null;
+  dash.draw('calendar', (el) => {
+    const dly = rows('daily'); if (!dly || !dly.length) { dashT(el); return; }
+    const days = dly.map(([d, n, m]) => ({ d, n, m, date: new Date(d + 'T00:00:00Z') }));
+    const years = [...new Set(days.map((x) => x.date.getUTCFullYear()))];
+    if (calYear == null || !years.includes(calYear)) calYear = years[years.length - 1];
+    const sorted = days.map((x) => x.m).sort((a, b) => a - b), p95 = sorted[Math.floor(0.95 * (sorted.length - 1))] || 1;
+    el.replaceChildren();
+    const bar = el$('div', 'keys'), wrap = el$('div', 'chart'); wrap.style.minHeight = '0'; el.append(bar, wrap);
+    const btns = years.map((y) => { const b = el$('button', 'tog', String(y)); b.type = 'button'; b.addEventListener('click', () => { calYear = y; render(); }); bar.append(b); return [y, b]; });
+    function render() {
+      btns.forEach(([y, b]) => { b.className = 'tog' + (y === calYear ? ' on' : ''); b.setAttribute('aria-pressed', String(y === calYear)); });
+      wrap.replaceChildren();
+      const yd = days.filter((x) => x.date.getUTCFullYear() === calYear);
+      const W = Math.max(wrap.clientWidth, 320), left = 30, cell = (W - left - 4) / 54, H = 7 * cell + 30;
+      const jan1 = new Date(Date.UTC(calYear, 0, 1)), off = (jan1.getUTCDay() + 6) % 7;
+      const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Daily minutes of delay in ' + calYear }, wrap);
+      ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'].forEach((t, i) => { if (t) svgEl('text', { x: left - 5, y: 18 + i * cell + cell * 0.7, 'text-anchor': 'end' }, svg).textContent = t; });
+      const seen = new Set(), tip = tooltip(wrap);
+      yd.forEach((x) => {
+        const doy = Math.round((x.date - jan1) / 86400000), wk = Math.floor((doy + off) / 7), wd = (x.date.getUTCDay() + 6) % 7;
+        const mo = x.date.getUTCMonth();
+        if (!seen.has(mo)) { seen.add(mo); svgEl('text', { x: left + wk * cell, y: 11, 'text-anchor': 'start' }, svg).textContent = d3.utcFormat('%b')(x.date); }
+        const c = svgEl('rect', { x: left + wk * cell, y: 18 + wd * cell, width: Math.max(1, cell - 1.6), height: Math.max(1, cell - 1.6), rx: 2, fill: dash.colors[0], 'fill-opacity': 0.07 + 0.93 * Math.min(1, x.m / p95) }, svg);
+        c.addEventListener('pointermove', (ev) => { const eb = wrap.getBoundingClientRect(); tip.show(d3.utcFormat('%a %-d %b %Y')(x.date), [fmt(x.m) + ' minutes', fmt(x.n) + ' incidents'], ev.clientX - eb.left, ev.clientY - eb.top); });
+        c.addEventListener('pointerleave', () => tip.hide());
+      });
+      const worst = yd.reduce((a, b) => (b.m > a.m ? b : a));
+      const note = el$('div', 'key', 'Worst day in ' + calYear + ': ' + d3.utcFormat('%-d %B')(worst.date) + ', ' + fmt(worst.m) + ' minutes across ' + fmt(worst.n) + ' incidents. Darkest colour is ' + fmt(p95) + ' minutes or more (the 95th percentile of all days).');
+      note.style.marginTop = '6px'; wrap.append(note);
+    }
+    render();
+  });
+
+  // ---------- month by year table
+  dash.draw('myheat', (tbl) => {
+    const m = rows('monthly'); if (!m || !m.length) { dashT(tbl); return; }
+    const by = new Map(m.map((d) => [d.month.slice(0, 7), d.total_delay_min])), years = [...new Set(m.map((d) => +d.month.slice(0, 4)))], mx = d3.max(m, (d) => d.total_delay_min);
+    const thead = el$('thead'), hr = el$('tr'); hr.append(el$('th', null, 'Year'));
+    d3.range(12).forEach((i) => hr.append(el$('th', 'n', d3.utcFormat('%b')(new Date(Date.UTC(2000, i, 1))))));
+    thead.append(hr);
+    const tb = el$('tbody');
+    years.forEach((y) => {
+      const tr = el$('tr'); tr.append(el$('td', null, String(y)));
+      d3.range(12).forEach((i) => {
+        const v = by.get(y + '-' + String(i + 1).padStart(2, '0')), td = el$('td', 'cell', v == null ? '' : cmp.format(v));
+        if (v != null) { td.style.background = tint(dash.colors[0], 0.06 + 0.7 * v / mx); td.title = d3.utcFormat('%B')(new Date(Date.UTC(2000, i, 1))) + ' ' + y + ': ' + fmt(v) + ' minutes'; }
+        tr.append(td);
+      });
+      tb.append(tr);
+    });
+    tbl.replaceChildren(thead, tb);
+  });
+
+  // ---------- cause groups
+  dash.draw('groups', (el) => {
+    const r = rows('group_year'); if (!r || !r.length) { dashT(el); return; }
+    el.replaceChildren();
+    const years = [...new Set(r.map((d) => d.yr))].sort((a, b) => a - b);
+    const W = Math.max(el.clientWidth, 280), H = 230, mg = { t: 8, r: 6, b: 24, l: 40 };
+    const x = d3.scaleBand(years, [mg.l, W - mg.r]).padding(0.18);
+    const tot = (y) => d3.sum(r.filter((d) => d.yr === y), (d) => d.minutes);
+    const yy = d3.scaleLinear([0, d3.max(years, tot)], [H - mg.b, mg.t]).nice();
+    const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Minutes of delay by cause group and year' }, el);
+    yy.ticks(4).forEach((v) => { svgEl('line', { x1: mg.l, x2: W - mg.r, y1: yy(v), y2: yy(v), stroke: 'var(--cds-chart-grid)' }, svg); svgEl('text', { x: mg.l - 6, y: yy(v) + 4, 'text-anchor': 'end' }, svg).textContent = cmp.format(v); });
+    years.forEach((y) => { if (y % 2 === 0) svgEl('text', { x: x(y) + x.bandwidth() / 2, y: H - 8, 'text-anchor': 'middle' }, svg).textContent = String(y); });
+    const tip = tooltip(el);
+    years.forEach((y) => {
+      let acc = 0; const g = svgEl('g', {}, svg);
+      GROUPS.forEach((gn) => { const d = r.find((q) => q.yr === y && q.grp === gn); const v = d ? d.minutes : 0, y0 = yy(acc + v); const h = yy(acc) - y0; acc += v; if (v) svgEl('rect', { x: x(y), y: y0, width: x.bandwidth(), height: Math.max(0, h), fill: gcol(gn), 'fill-opacity': gn === 'Other and unclassified' ? 0.45 : 1 }, g); });
+      const hit = svgEl('rect', { x: x(y) - 2, y: mg.t, width: x.bandwidth() + 4, height: H - mg.b - mg.t, fill: 'transparent' }, svg);
+      hit.addEventListener('pointermove', (ev) => { const eb = el.getBoundingClientRect(); tip.show(String(y) + (y === years[years.length - 1] ? ' (to Sep)' : ''), GROUPS.map((gn) => { const d = r.find((q) => q.yr === y && q.grp === gn); return gn + ': ' + fmt(d ? d.minutes : 0); }), ev.clientX - eb.left, ev.clientY - eb.top); });
+      hit.addEventListener('pointerleave', () => tip.hide());
+    });
+    const key = document.getElementById('gkey');
+    if (key) key.replaceChildren(...GROUPS.map((gn) => { const k = el$('span', 'key'); const s = el$('span', 'sw'); s.style.background = gcol(gn); k.append(s, gn); return k; }));
+  });
+  body('group_body', 'group_ltm', (r) => { const tot = d3.sum(r, (d) => d.cur_min); return r.map((d) => [[d.grp], [fmt(d.cur_min), 'n'], [Math.round(100 * d.cur_min / tot) + '%', 'n'], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n']]); });
+  body('levers_body', 'group_ltm', (r) => { const tot = d3.sum(r, (d) => d.cur_min); return r.map((d) => [[d.grp], [fmt(d.cur_min), 'n'], [Math.round(100 * d.cur_min / tot) + '%', 'n'], [LEVERS[d.grp] || '', 'wrap']]); });
+
+  // ---------- decision and rider text, computed from the data
+  dash.draw('decide', (ul) => {
+    const g = rows('group_ltm'), w = rows('watch'), m = rows('monthly'), b = rows('buckets');
+    if (![g, w, m, b].every((x) => x && x.length) || m.length < 24) { ul.replaceChildren(el$('li', null, '—')); return; }
+    const win = windows(m), tot = d3.sum(g, (d) => d.cur_min), pct = (v) => Math.round(100 * v / tot) + '%';
+    const li = (...p) => { const l = el$('li'); p.forEach((q) => l.append(typeof q === 'string' ? document.createTextNode(q) : q)); return l; };
+    const B = (t) => el$('b', null, t);
+    const top = g.filter((d) => d.grp !== 'Other and unclassified').slice(0, 2);
+    const items = [];
+    items.push(li('The two cause groups with the most minutes in the last 12 months are ', B(top[0].grp), ' (' + pct(top[0].cur_min) + ' of minutes, ' + fmt(top[0].cur_min) + ') and ', B(top[1].grp), ' (' + pct(top[1].cur_min) + '). Each has its own owner inside the organisation, so the questions differ: who responds, how fast, and what prevents a repeat.'));
+    const rise = g.filter((d) => d.prev_min > 0).reduce((a, c) => ((c.cur_min - c.prev_min) > (a.cur_min - a.prev_min) ? c : a));
+    if (rise.cur_min > rise.prev_min) items.push(li('The biggest rise against the prior 12 months is in ', B(rise.grp), ': ' + fmt(rise.prev_min) + ' to ' + fmt(rise.cur_min) + ' minutes. A rise like this is worth a look at whether it is one event, a season or a trend.'));
+    const topShare = d3.sum(w, (d) => d.cur_min) / win.minL;
+    items.push(li('The 15 stations with the most delay minutes account for ', B(Math.round(100 * topShare) + '%'), ' of all minutes in the last 12 months, out of hundreds of stations. Station-level reviews could reach a lot of the problem, though a few of those minutes come from single long incidents.'));
+    const full = b[b.length - 2];
+    items.push(li('Incidents of 30 minutes or more are about ', B(Math.round(100 * full.b4 / (full.b1 + full.b2 + full.b3 + full.b4)) + '%'), ' of delays that lost time in ' + full.yr + ' but ', B(Math.round(100 * full.major_min / full.total_min) + '%'), ' of the minutes. How quickly a long incident is cleared and service recovered is where a lot of time is at stake.'));
+    ul.replaceChildren(...items);
+  });
+
+  dash.draw('riders', (ul) => {
+    const h = rows('heat'), dly = rows('daily'); if (!h || !h.length || !dly || !dly.length) { ul.replaceChildren(el$('li', null, '—')); return; }
+    const li = (...p) => { const l = el$('li'); p.forEach((q) => l.append(typeof q === 'string' ? document.createTextNode(q) : q)); return l; };
+    const B = (t) => el$('b', null, t);
+    const wk = h.filter((d) => !['SATURDAY', 'SUNDAY'].includes(d.day_name));
+    const byHour = d3.rollups(wk, (v) => d3.sum(v, (d) => d.incidents), (d) => d.hour_of_day).sort((a, c) => c[1] - a[1]);
+    const top3 = byHour.slice(0, 3).map(([hr]) => hh(hr));
+    const allH = d3.rollups(h, (v) => d3.sum(v, (d) => d.incidents), (d) => d.hour_of_day).sort((a, c) => a[1] - c[1]);
+    const quiet = allH.slice(0, 3).map(([hr]) => hh(hr)).sort();
+    const cells = h.slice().sort((a, c) => c.minutes - a.minutes)[0];
+    const isWe = (d) => { const k = new Date(d + 'T00:00:00Z').getUTCDay(); return k === 0 || k === 6; };
+    const avg = (f) => { const s = dly.filter(([d]) => f(isWe(d))); return [d3.sum(s, (x) => x[1]) / s.length, d3.sum(s, (x) => x[2]) / s.length]; };
+    const [wi, wm] = avg((we) => !we), [ei, em] = avg((we) => we);
+    ul.replaceChildren(
+      li('On weekdays, the hours that log the most delays are ', B(top3.join(', ')), '. The single costliest hour of the week, by minutes of delay, is ', B(dayName(cells.day_name) + ' at ' + hh(cells.hour_of_day)), ' (' + fmt(cells.minutes) + ' minutes since 2014)' + (cells.day_name === 'SUNDAY' && cells.hour_of_day === 8 ? ', an hour when Sunday service begins.' : '.')),
+      li('The fewest delays are logged at ', B(quiet.join(', ')), ', when little or no service runs.'),
+      li('A typical weekday logs ', B(d3.format('.0f')(wi) + ' incidents'), ' and ', B(d3.format('.0f')(wm) + ' minutes'), ' of delay; a typical weekend day logs ' + d3.format('.0f')(ei) + ' incidents and ' + d3.format('.0f')(em) + ' minutes.'),
+      li('A delay logged in the data is not the same as a delay you personally met: it counts trains held up, not riders affected. For live service alerts, use the TTC’s own channels.')
+    );
+  });
+
+  // ---------- numbers check
+  dash.draw('audit_body', (tb) => {
+    const k = rows('kpi'), y = rows('yearly'), m = rows('monthly'), dly = rows('daily'), h = rows('heat'), b = rows('buckets'), g = rows('group_year'), l = rows('lines'), nt = scalar('no_time');
+    if (![k, y, m, dly, h, b, g, l].every((x) => x && x.length) || nt == null) { return; }
+    const K = k[0], S = (a, f) => d3.sum(a, f);
+    const checks = [
+      ['Incidents: sum of years', K.incidents, S(y, (d) => d.incidents)],
+      ['Minutes: sum of years', K.total_delay_min, S(y, (d) => d.total_delay_min)],
+      ['Incidents: sum of months', K.incidents, S(m, (d) => d.incidents)],
+      ['Minutes: sum of months', K.total_delay_min, S(m, (d) => d.total_delay_min)],
+      ['Incidents: sum of days', K.incidents, S(dly, (d) => d[1])],
+      ['Minutes: sum of days', K.total_delay_min, S(dly, (d) => d[2])],
+      ['Incidents: weekday and hour table plus rows without a time', K.incidents, S(h, (d) => d.incidents) + nt],
+      ['Minutes: weekday and hour table', K.total_delay_min, S(h, (d) => d.minutes)],
+      ['Incidents: severity table', K.incidents, S(b, (d) => d.incidents)],
+      ['Minutes: cause groups', K.total_delay_min, S(g, (d) => d.minutes)],
+      ['Minutes: lines', K.total_delay_min, S(l, (d) => d.total_delay_min)],
+      ['Source rows: kept plus duplicates removed plus rejected', K.source_rows, K.incidents + (K.source_rows - K.incidents - K.rejects) + K.rejects]
+    ];
+    const rowsOut = checks.map(([n, a, f]) => { const ok = a === f; const tr = el$('tr'); tr.append(el$('td', null, n), el$('td', 'n', fmt(a)), el$('td', 'n', fmt(f)), el$('td', ok ? 'pass' : 'fail', ok ? 'match' : 'MISMATCH')); return tr; });
+    const dup = K.source_rows - K.incidents - K.rejects;
+    const note = el$('tr'); const c = el$('td', null, 'The City published ' + fmt(K.source_rows) + ' rows; ' + fmt(K.incidents) + ' are kept, ' + fmt(dup) + ' exact duplicates were removed and ' + fmt(K.rejects) + ' were rejected.'); c.colSpan = 4; c.style.color = 'var(--color-fg-muted)'; note.append(c);
+    tb.replaceChildren(...rowsOut, note);
   });
 })();
 </script>
