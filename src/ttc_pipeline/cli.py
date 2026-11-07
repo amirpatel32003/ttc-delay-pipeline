@@ -1,4 +1,4 @@
-"""Command line: python -m ttc_pipeline.cli [ingest|build|check|run|docs] [--sample] [--limit-files N] [--force]"""
+"""Command line: python -m ttc_pipeline.cli [ingest|build|check|run|docs|export] [--sample] [--limit-files N] [--force]"""
 from __future__ import annotations
 
 import argparse
@@ -22,7 +22,8 @@ def load_codes(from_sample: bool) -> None:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(prog="ttc_pipeline")
-    p.add_argument("step", choices=["ingest", "build", "check", "run", "docs"])
+    p.add_argument("step", choices=["ingest", "build", "check", "run", "docs", "export"])
+    p.add_argument("--out", default=None, help="export: output path (default site/dashboard_data.json)")
     p.add_argument("--sample", action="store_true", help="use bundled synthetic data (offline, separate warehouse)")
     p.add_argument("--limit-files", type=int, default=None, help="only download the first N yearly files")
     p.add_argument("--force", action="store_true", help="ignore the manifest and re-download everything")
@@ -40,11 +41,16 @@ def main(argv: list[str] | None = None) -> int:
         else:
             ingest.ingest_from_api(a.limit_files, force=a.force)
         load_codes(a.sample)
-    if a.step in ("build", "run", "check", "docs"):
+    if a.step in ("build", "run", "check", "docs", "export"):
         con = warehouse.build()
         if a.step == "docs":
             from . import docs
             path = docs.write_schema_doc(con)
+            print(f"wrote {path}")
+        if a.step == "export":
+            from pathlib import Path
+            from . import export
+            path = export.write_payload(con, Path(a.out or config.ROOT / "site" / "dashboard_data.json"))
             print(f"wrote {path}")
         if a.step in ("check", "run"):
             results = quality.run_checks(con)

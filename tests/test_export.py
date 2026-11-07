@@ -1,0 +1,49 @@
+"""The dashboard export: shape, JSON-serialisable, and every table the page reads is present."""
+import json
+
+import pytest
+
+from ttc_pipeline import config, export, ingest, warehouse
+from ttc_pipeline.cli import load_codes
+from ttc_pipeline.sample import write_sample
+
+KEYS = {"asof", "generated_at", "kpi", "yearly", "monthly", "stations", "hourly", "lines", "line_year", "buckets",
+        "causes", "cause_year", "watch", "causes_ltm", "line_ltm", "ingestion", "checks"}
+
+
+@pytest.fixture()
+def payload(tmp_path, monkeypatch):
+    monkeypatch.setattr(config, "BRONZE", tmp_path / "bronze")
+    monkeypatch.setattr(config, "WAREHOUSE", tmp_path / "wh")
+    monkeypatch.setattr(config, "SAMPLE", tmp_path / "sample")
+    write_sample(config.SAMPLE)
+    ingest.ingest_from_sample()
+    load_codes(True)
+    con = warehouse.build()
+    return export.build_payload(con), con
+
+
+def test_payload_has_every_key_and_is_json(payload):
+    data, _ = payload
+    assert KEYS <= set(data)
+    json.dumps(data)
+
+
+def test_kpi_matches_the_warehouse(payload):
+    data, con = payload
+    n = con.execute("SELECT count(*) FROM silver_delays").fetchone()[0]
+    assert data["kpi"][0]["incidents"] == n
+    assert sum(r["incidents"] for r in data["yearly"]) == n
+    assert sum(r["incidents"] for r in data["buckets"]) == n
+
+
+def test_severity_buckets_add_up(payload):
+    data, _ = payload
+    for r in data["buckets"]:
+        assert r["b0"] + r["b1"] + r["b2"] + r["b3"] + r["b4"] == r["incidents"]
+
+
+def test_write_payload_creates_file(payload, tmp_path):
+    _, con = payload
+    path = export.write_payload(con, tmp_path / "out" / "dashboard_data.json")
+    assert json.loads(path.read_text())["asof"]
