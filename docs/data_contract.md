@@ -150,7 +150,7 @@ The checks in `src/ttc_pipeline/quality.py` run on every `run` and `check`; each
 
 ## Known data issues (observed on the live files)
 
-- Published row counts per year are very uneven: roughly 20,000 rows per year in 2014-2016 and 2022-2026 but only about 1,200-1,900 per year for 2018-2021 (2017 has 7,589). Do not read trends across those years as real changes in service without checking coverage first.
+- The 2017-2021 files are Excel workbooks with one sheet per month; the loader reads every sheet that has a Date column (a first version read only the first sheet and silently dropped 11 of 12 months a year).
 - min_delay = 0 for about two thirds of rows (an incident was logged but no delay was recorded), so averages mix zero and non-zero delays; gold tables expose both incidents and delay_incidents (min_delay > 0).
 - bound is blank for roughly 29% of rows in the source and is NULL in silver; values outside N/S/E/W/B are set to NULL.
 - vehicle = 0 means 'no vehicle recorded', not train number zero.

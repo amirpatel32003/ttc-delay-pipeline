@@ -6,14 +6,14 @@ Generated from the DuckDB catalog by `python -m ttc_pipeline.cli docs` on 2026-1
 |---|---|---:|---:|
 | [`bronze_codes`](#bronze_codes) | internal | 212 | 2 |
 | [`dim_codes`](#dim_codes) | internal | 212 | 2 |
-| [`gold_cause_breakdown`](#gold_cause_breakdown) | gold | 229 | 5 |
-| [`gold_daily_summary`](#gold_daily_summary) | gold | 3,105 | 5 |
+| [`gold_cause_breakdown`](#gold_cause_breakdown) | gold | 236 | 5 |
+| [`gold_daily_summary`](#gold_daily_summary) | gold | 4,656 | 5 |
 | [`gold_hourly_pattern`](#gold_hourly_pattern) | gold | 168 | 4 |
-| [`gold_monthly_trend`](#gold_monthly_trend) | gold | 610 | 6 |
-| [`gold_station_ranking`](#gold_station_ranking) | gold | 775 | 5 |
+| [`gold_monthly_trend`](#gold_monthly_trend) | gold | 935 | 6 |
+| [`gold_station_ranking`](#gold_station_ranking) | gold | 920 | 5 |
 | [`ingestion_log`](#ingestion_log) | bronze | 10 | 11 |
-| [`silver_delays`](#silver_delays) | silver | 194,040 | 14 |
-| [`silver_delays_all`](#silver_delays_all) | internal | 194,175 | 13 |
+| [`silver_delays`](#silver_delays) | silver | 270,007 | 14 |
+| [`silver_delays_all`](#silver_delays_all) | internal | 270,282 | 13 |
 | [`silver_rejects`](#silver_rejects) | silver | 0 | 14 |
 
 Contract status: catalog matches `contract.py`.

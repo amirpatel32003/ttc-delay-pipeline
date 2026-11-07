@@ -100,3 +100,40 @@ def test_ingestion_log_empty_without_manifest(tmp_path):
         tmp_path / "b" / "delays_x.parquet", index=False)
     con = warehouse.build(tmp_path / "b", tmp_path / "w.duckdb")
     assert con.execute("SELECT count(*) FROM ingestion_log").fetchone()[0] == 0
+
+
+def _workbook(sheets):
+    import io
+    from openpyxl import Workbook
+    wb = Workbook(); wb.remove(wb.active)
+    for name, rows in sheets.items():
+        ws = wb.create_sheet(name)
+        for r in rows:
+            ws.append(r)
+    buf = io.BytesIO(); wb.save(buf)
+    return buf.getvalue()
+
+
+HDR = ["Date", "Time", "Day", "Station", "Code", "Min Delay", "Min Gap", "Bound", "Line", "Vehicle"]
+
+
+def test_xlsx_reads_every_monthly_sheet_and_skips_non_data_sheets():
+    content = _workbook({
+        "Jan18": [HDR, ["2018-01-01", "00:29", "Monday", "SHEPPARD WEST STATION", "MUATC", "10", "15", "N", "YU", "5986"]],
+        "Feb 18": [HDR, ["2018-02-01", "01:00", "Thursday", "DUNDAS STATION", "MUIS", "2", "4", "S", "YU", "5001"],
+                   ["2018-02-02", "02:00", "Friday", "BLOOR STATION", "MUIS", "0", "0", "E", "BD", "5002"]],
+        "Notes": [["Remember", "to"], ["read", "me"]],
+    })
+    df = ingest.read_resource(content, "xlsx")
+    assert len(df) == 3 and set(df["date"]) == {"2018-01-01", "2018-02-01", "2018-02-02"}
+
+
+def test_old_parser_version_forces_reingest_even_if_unchanged(tmp_path):
+    ingest.ingest_resources(res(), Fetcher(CSV), tmp_path)
+    m = ingest.load_manifest(tmp_path)
+    m["r1"]["parser_version"] = ingest.PARSER_VERSION - 1     # as written by the old single-sheet parser
+    ingest.save_manifest(m, tmp_path)
+    f = Fetcher(CSV)
+    out = ingest.ingest_resources(res(), f, tmp_path)
+    assert out.ingested and f.calls == 1
+    assert ingest.load_manifest(tmp_path)["r1"]["parser_version"] == ingest.PARSER_VERSION

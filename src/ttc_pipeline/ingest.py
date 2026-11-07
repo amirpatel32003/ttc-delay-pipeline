@@ -26,6 +26,7 @@ from . import config
 
 log = logging.getLogger(__name__)
 HEADERS = {"User-Agent": "ttc-delay-pipeline/0.2 (portfolio project)"}
+PARSER_VERSION = 2  # 2: xlsx workbooks are read from every sheet (v1 only read the first, losing months of 2017-2021)
 FORMAT_PREFERENCE = {"csv": 0, "xlsx": 1}  # the portal publishes the same data in several formats; take the cheapest
 
 
@@ -103,7 +104,17 @@ def _read_table(content: bytes, fmt: str) -> pd.DataFrame:
     return pd.read_csv(io.BytesIO(content), dtype=str, encoding_errors="replace")
 
 
+def _has_date_column(df: pd.DataFrame) -> bool:
+    return any(str(c).strip().lower() == "date" for c in df.columns)
+
+
 def read_resource(content: bytes, fmt: str) -> pd.DataFrame:
+    """Parse one published file. 2017-2021 workbooks hold one sheet per month, so read all sheets that have a Date column."""
+    if fmt.lower() == "xlsx":
+        sheets = pd.read_excel(io.BytesIO(content), dtype=str, sheet_name=None)
+        frames = [normalize_columns(df) for df in sheets.values() if _has_date_column(df)]
+        log.info("read %d of %d sheets", len(frames), len(sheets))
+        return pd.concat(frames, ignore_index=True) if frames else normalize_columns(pd.DataFrame())
     return normalize_columns(_read_table(content, fmt))
 
 
@@ -200,7 +211,8 @@ def ingest_resources(resources: list[dict], fetch: Callable[[str], bytes], bronz
         last_modified = res.get("last_modified")
         have_file = parquet.exists()
 
-        if not force and entry and have_file and last_modified and entry.get("last_modified") == last_modified:
+        current = entry is not None and entry.get("parser_version") == PARSER_VERSION  # old parser output is stale
+        if not force and entry and have_file and current and last_modified and entry.get("last_modified") == last_modified:
             log.info("skip %s (unchanged since %s)", source, last_modified)
             result.skipped_unchanged.append(source)
             continue
@@ -208,7 +220,7 @@ def ingest_resources(resources: list[dict], fetch: Callable[[str], bytes], bronz
         log.info("downloading %s", res.get("name"))
         content = fetch(res["url"])
         digest = sha256(content)
-        if not force and entry and have_file and entry.get("sha256") == digest:
+        if not force and entry and have_file and current and entry.get("sha256") == digest:
             log.info("skip %s (same content hash)", source)
             entry.update(last_modified=last_modified, checked_at=_now())
             result.skipped_same_hash.append(source)
@@ -220,7 +232,8 @@ def ingest_resources(resources: list[dict], fetch: Callable[[str], bytes], bronz
         manifest[key] = {
             "resource_id": key, "name": res.get("name"), "url": res["url"], "format": fmt,
             "last_modified": last_modified, "sha256": digest, "bytes": len(content), "rows": int(len(df)),
-            "bronze_file": parquet.name, "ingested_at": _now(), "checked_at": _now(),
+            "bronze_file": parquet.name, "parser_version": PARSER_VERSION,
+            "ingested_at": _now(), "checked_at": _now(),
         }
         result.ingested.append(source)
         save_manifest(manifest, bronze_dir)

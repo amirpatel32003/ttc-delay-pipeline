@@ -45,25 +45,25 @@ Measured on the live Toronto Open Data package `ttc-subway-delay-data` (run on 2
 | Metric | Value |
 |---|---|
 | Source files loaded | 10 (yearly files 2014 to 2024 plus the "since 2025" file) |
-| Source rows | 194,175 |
-| Exact duplicates removed | 135 |
-| Rows in `silver_delays` | 194,040 (2014-01-01 to 2026-09-30) |
+| Source rows | 270,282 |
+| Exact duplicates removed | 275 |
+| Rows in `silver_delays` | 270,007 (2014-01-01 to 2026-09-30, every month present) |
 | Rows rejected | 0 |
-| Gold stations ranked | 775 |
-| First full ingest | about 12 s |
+| Gold stations ranked | 920 |
+| First full ingest | about 17 s |
 | Second run (nothing changed) | all 10 files skipped without a download |
-| Tests | 41 pass locally, 1 Airflow import test runs in the CI `dag` job |
+| Tests | 43 pass locally, 1 Airflow import test runs in the CI `dag` job |
 
 What the real data taught me (each one is now a fix plus a regression test):
 
 - The portal publishes the "since 2025" data four times (datastore XLSX dump, CSV, XML, JSON). The ingest keeps one resource per dataset and prefers CSV.
 - The line column has many spellings (`YU/BD`, `YUS`, `BLOOR DANF`, `YU / BD`) and a few junk values (`999`, `60`). They collapse to `YU`, `BD`, `SHP`, `SRT`, `YU/BD` or `OTHER`. Blank or `OTHER` stays below 0.4% of rows.
-- Station names are truncated at 20 characters (`KIPLING STATION (ENTER`) and carry line qualifiers (`KENNEDY BD`, `KENNEDY SRT`). About 9,700 rows name a track segment or a whole line instead of a station, so they are flagged `is_station = FALSE` and left out of the station ranking.
-- 25 delay codes (1,784 incidents) are not in the current code lookup even after filling from the legacy 2022 workbook; they show as "Unknown code".
-- The published row counts are very uneven: about 20,000 rows a year in 2014-2016 and 2022-2026, but only 1,200-1,900 a year in 2018-2021. Any trend across those years needs a coverage caveat (listed in the data contract).
+- Station names are truncated at 20 characters (`KIPLING STATION (ENTER`) and carry line qualifiers (`KENNEDY BD`, `KENNEDY SRT`). About 13,400 rows name a track segment or a whole line instead of a station, so they are flagged `is_station = FALSE` and left out of the station ranking.
+- 29 delay codes (1,867 incidents) are not in the current code lookup even after filling from the legacy 2022 workbook; they show as "Unknown code".
+- The 2017-2021 files are Excel workbooks with one sheet per month. My first loader read only the first sheet, so the warehouse silently held January of 2018-2021 and May of 2017 and looked as if the City had published almost nothing. The dashboard exposed it. The loader now reads every sheet, the ingest ledger records a parser version so already-loaded files are reprocessed, and a test builds a multi-sheet workbook. A check for every month from 2014 to 2026 now finds none missing.
 - About two thirds of rows have `min_delay = 0`, so delay averages are reported next to `delay_incidents`.
 
-Top station by total delay minutes in this data: KENNEDY (8,951 incidents, 22,751 minutes). Treat that as a first look, not a finding: Day 3 will check it against the coverage gap.
+Top station by total delay minutes in this data: KENNEDY (12,637 incidents, 33,520 minutes).
 
 ## Incremental loading
 
