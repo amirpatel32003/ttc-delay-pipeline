@@ -135,6 +135,14 @@ a { color: inherit; }
 .ttc .hero { position: relative; }
 .ttc button.pdfbtn { position: absolute; top: 14px; right: 14px; }
 @media (max-width: 560px) { .ttc a.pdfbtn { position: static; margin-bottom: 10px; } }
+.ttc .jump { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 2px; }
+.ttc .jump a { text-decoration: none; color: #fff; border: 1px solid #ffffff66; border-radius: 999px; padding: 6px 14px; font-size: var(--cds-font-size-caption); }
+.ttc .jump a:hover { background: #ffffff22; }
+.ttc .jump a.pri { background: var(--ttc-red); border-color: var(--ttc-red); font-weight: 600; }
+.ttc .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.ttc .cta a { text-decoration: none; border-radius: 8px; padding: 10px 16px; border: 1px solid var(--color-border-line); color: var(--color-fg); font-weight: 600; }
+.ttc .cta a.pri { background: var(--ttc-red); border-color: var(--ttc-red); color: #fff; }
+@media print { .ttc .jump, .ttc .cta { display: none !important; } }
 .ttc .asks li { margin: 6px 0; line-height: 1.5; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
@@ -148,6 +156,7 @@ a { color: inherit; }
     <div class="kick">TTC subway delays, January 2014 to today</div>
     <h1 data-draw="hero_h" data-source="monthly">...</h1>
     <p class="herosub" data-draw="hero_p" data-source="monthly heat">...</p>
+    <div class="jump"><a class="pri" href="#ch-3" data-go="ch-3">Riders: take the 10 second test</a><a href="#ch-6" data-go="ch-6">Decision makers: options and questions</a></div>
     <p class="sub">Data through <span data-draw="asof" data-source="kpi">...</span>, the latest the City has published; new data is added as it appears &middot; Source: City of Toronto Open Data, TTC Subway Delay Data &middot; page refreshed <span data-generated>...</span> &middot; independent analysis by Amir Patel &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
   </header>
   <div class="prog" data-draw="progress" data-source="kpi"></div>
@@ -328,6 +337,13 @@ a { color: inherit; }
     <h2>Three questions worth putting to the TTC</h2>
     <p class="note">Drawn from the numbers above. They are questions, not conclusions: the data shows where minutes go, and only TTC management, its Board and the City can say why and what to do.</p>
     <ol class="asks" data-draw="asks" data-source="heat group_ltm watch"></ol>
+  </section>
+
+  <section class="card">
+    <h2>If you can act on this</h2>
+    <p class="note">If you work at the TTC, on its Board, at City Hall or in a transit advocacy group, these are the next three steps. Each takes a minute.</p>
+    <ol class="asks"><li>Read chapter 6 for where the minutes go and the options an operator could weigh.</li><li>Take the three questions above to the next planning or committee meeting.</li><li>Pass this on to the person who owns that decision.</li></ol>
+    <div class="cta"><a class="pri" href="ttc-delay-report.pdf" download="TTC-subway-delays-report.pdf">Download the PDF report</a><a href="mailto:?subject=TTC%20subway%20delays%3A%20what%2012%20years%20of%20data%20show&body=This%20open%20dashboard%20shows%20when%2C%20where%20and%20why%20TTC%20subway%20delays%20happen%2C%20built%20from%20City%20of%20Toronto%20open%20data.%20Worth%20a%20look%3A%20https%3A%2F%2Famirpatel32003.github.io%2Fttc-delay-pipeline%2F">Email this to a colleague</a></div>
   </section>
 
   <section class="card">
