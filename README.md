@@ -1,5 +1,9 @@
 # TTC Subway Delay Pipeline
 
+[![CI](https://github.com/amirpatel32003/ttc-delay-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/amirpatel32003/ttc-delay-pipeline/actions/workflows/ci.yml)
+[![Dashboard](https://github.com/amirpatel32003/ttc-delay-pipeline/actions/workflows/dashboard.yml/badge.svg)](https://github.com/amirpatel32003/ttc-delay-pipeline/actions/workflows/dashboard.yml)
+[![Live dashboard](https://img.shields.io/badge/live-dashboard-DA291C)](https://amirpatel32003.github.io/ttc-delay-pipeline/)
+
 An end-to-end data engineering project on **Toronto Open Data**: it ingests the City of Toronto's TTC subway delay
 files, cleans and models them with **DuckDB SQL**, validates them with automated **data-quality checks**, and
 exposes analytics tables that answer questions like *which stations lose the most rider minutes?*
@@ -28,6 +32,17 @@ flowchart LR
 | Gold | Business-ready aggregates | `gold_daily_summary`, `gold_station_ranking`, `gold_hourly_pattern`, `gold_monthly_trend`, `gold_cause_breakdown` |
 | Quality | 9 automated checks (nulls, ranges, duplicates, reject rate, unknown-line rate, gold = silver reconciliation) | `ttc_pipeline/quality.py` |
 | Ledger | One row per source file: `last_modified`, SHA-256, rows, bytes | `ingestion_log` table, `data/bronze/_manifest.json` |
+
+## The dashboard
+
+The public dashboard is a single static page (`docs/dashboard/index.html`, plain HTML, CSS and JavaScript with d3 for the charts). It reads `dashboard_data.json`, which the pipeline exports from the gold tables. A GitHub Actions workflow (`.github/workflows/dashboard.yml`) rebuilds everything every day:
+
+1. load new files from Toronto Open Data and run the quality checks
+2. export the gold tables to JSON
+3. render a downloadable PDF report
+4. publish the page, the data and the PDF to GitHub Pages
+
+The page also re-adds its own totals in the browser on every load and shows any mismatch against the headline figures. It works on phones and has a short plain-English view for people who do not want every chart.
 
 ## Run it
 
@@ -83,7 +98,7 @@ Each CKAN resource is recorded in a ledger with its `last_modified` and the SHA-
 `dags/ttc_daily_dag.py` runs ingest, build and check daily. Its structure is tested with pytest (task order, CLI steps, settings) and a CI job installs Airflow 2.10.5 and imports it through `DagBag`. Honest status: it has not been run on a live Airflow scheduler yet, and the real-data run happens on my machine, because CI only has the bundled sample.
 
 ## Tech
-Python · DuckDB · pandas · PyArrow · SQL · pytest · GitHub Actions · Apache Airflow (DAG)
+Python · DuckDB · pandas · PyArrow · SQL · pytest · GitHub Actions · GitHub Pages · Apache Airflow (DAG) · JavaScript and d3 (dashboard)
 
 ## Roadmap
 - [x] Day 1: bronze/silver/gold, quality checks, tests, CI
