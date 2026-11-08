@@ -4,7 +4,9 @@ An end-to-end data engineering project on **Toronto Open Data**: it ingests the 
 files, cleans and models them with **DuckDB SQL**, validates them with automated **data-quality checks**, and
 exposes analytics tables that answer questions like *which stations lose the most rider minutes?*
 
-> Status: **work in progress, built in public.** Day 2 of 3 done: the pipeline runs on the real Toronto data, loads are incremental, the schema has a data contract, and the Airflow DAG is tested. Day 3 (dashboard and write-up) is next.
+> Status: **built in public over 3 days.** The pipeline runs on the real Toronto data, loads are incremental, the schema has a data contract, the Airflow DAG is tested, and a public dashboard is rebuilt daily from the City's open data.
+>
+> **Live dashboard:** https://amirpatel32003.github.io/ttc-delay-pipeline/
 
 ## Architecture
 
@@ -84,6 +86,6 @@ Python · DuckDB · pandas · PyArrow · SQL · pytest · GitHub Actions · Apac
 ## Roadmap
 - [x] Day 1: bronze/silver/gold, quality checks, tests, CI
 - [x] Day 2: real data run, incremental loads, data contract and schema docs, Airflow DAG tested
-- [ ] Day 3: dashboard with real findings, performance notes, final README write-up
+- [x] Day 3: public dashboard with real findings (plain-English view, phone layout, downloadable PDF), final README write-up
 
 Data: [City of Toronto Open Data - TTC Subway Delay Data](https://open.toronto.ca/dataset/ttc-subway-delay-data/), Open Government Licence - Toronto.

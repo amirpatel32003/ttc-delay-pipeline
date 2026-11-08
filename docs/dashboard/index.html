@@ -5,21 +5,21 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
 <style>
 :root { color-scheme: light dark;
-  --font-anthropic-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --font-anthropic-serif: Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; --font-serif: Georgia, "Times New Roman", serif;
   --bg: #f4f4f2; --color-panel: #ffffff; --color-border-line: #e3e2dc; --color-fg: #1f1e1b; --color-fg-muted: #6b6a63;
   --color-ok: #1f7a4d; --color-bad: #b3402a; --cds-chart-grid: #e8e7e1; --cds-chart-axis: #b9b8b0;
   --cds-surface-popover: #ffffff; --cds-border: #d6d5cd; --cds-shadow-popover: 0 4px 14px rgba(0,0,0,.12); --cds-text-secondary: #6b6a63;
   --c0: #DA291C; --c1: #3d4a57; --c2: #00853F; --c3: #E0A800; --c4: #0082C8; --c5: #8a8a82;
-  --color-bg: var(--bg); --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 22px; --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-lg: 18px; --cds-radius: 10px;
+  --color-bg: var(--bg); --cds-gap-sm: 8px; --cds-gap-md: 14px; --cds-gap-lg: 22px; --cds-pad-xs: 4px; --cds-pad-sm: 8px; --cds-pad-md: 12px; --cds-pad-lg: 18px; --cds-radius: 10px;
   --cds-font-size-title: 30px; --cds-font-size-heading: 16px; --cds-font-size-caption: 13px; --cds-font-size-body: 15px; --cds-font-weight-medium: 600; --dash-gutter: clamp(12px, 3vw, 28px); }
 @media (prefers-color-scheme: dark) { :root { --bg: #161614; --color-panel: #1f1f1c; --color-border-line: #33332e; --color-fg: #ecebe6; --color-fg-muted: #a3a29a;
   --color-ok: #5fcf9a; --color-bad: #f08a72; --cds-chart-grid: #2d2d29; --cds-chart-axis: #55554f; --cds-surface-popover: #26261f; --cds-border: #45453d; --cds-text-secondary: #a3a29a;
   --c0: #ff5a4d; --c1: #9fb0c0; --c2: #3dbb78; --c3: #f2c14e; --c4: #4fb3e8; --c5: #a3a29a; } }
-html { background: var(--bg); } body { margin: 0; padding: var(--dash-gutter); background: var(--bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body); }
+html { background: var(--bg); } body { margin: 0; padding: var(--dash-gutter); background: var(--bg); color: var(--color-fg); font-family: var(--font-sans); font-size: var(--cds-font-size-body); }
 a { color: inherit; }
 
-.ttc { max-width: 1180px; margin-inline: auto; font-family: var(--font-anthropic-sans); display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
-.ttc h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
+.ttc { max-width: 1180px; margin-inline: auto; font-family: var(--font-sans); display: flex; flex-direction: column; gap: var(--cds-gap-lg); }
+.ttc h1 { font-family: var(--font-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; }
 .ttc .sub { margin: 4px 0 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 .ttc .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
 .ttc .card h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0 0 2px; }
@@ -29,7 +29,7 @@ a { color: inherit; }
 .ttc .brief li b { font-variant-numeric: tabular-nums; }
 .ttc .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12.5rem), 1fr)); gap: var(--cds-gap-md); }
 .ttc .tile .lab { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
-.ttc .tile .num { font-family: var(--font-anthropic-serif); font-size: var(--cds-font-size-title); margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
+.ttc .tile .num { font-family: var(--font-serif); font-size: var(--cds-font-size-title); margin: 4px 0 2px; font-variant-numeric: tabular-nums; }
 .ttc .tile .dl { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
 .ttc .tile .ctx { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin-top: 2px; }
 .ttc .up { color: var(--color-bad); } .ttc .down { color: var(--color-ok); } .ttc .flat { color: var(--color-fg-muted); }
@@ -38,7 +38,7 @@ a { color: inherit; }
 .ttc .chart { position: relative; min-height: 240px; }
 .ttc .chart.short { min-height: 200px; }
 .ttc .chart svg { display: block; width: 100%; height: auto; }
-.ttc .chart text { fill: var(--color-fg-muted); font-size: 11px; font-family: var(--font-anthropic-sans); }
+.ttc .chart text { fill: var(--color-fg-muted); font-size: 11px; font-family: var(--font-sans); }
 .ttc .tt { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius); box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; z-index: 2; }
 .ttc .tt .h { color: var(--cds-text-secondary); }
 .ttc .keys { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 0 0 8px; }
@@ -76,14 +76,14 @@ a { color: inherit; }
 .ttc .chapnav a.on { background: var(--color-fg); color: var(--color-panel); border-color: var(--color-fg); }
 .ttc .chap { padding-top: 30px; scroll-margin-top: 64px; }
 .ttc .chap .ck { font-size: var(--cds-font-size-caption); letter-spacing: .06em; text-transform: uppercase; color: var(--color-fg-muted); }
-.ttc .chap .cq { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: clamp(24px, 3.8vw, 34px); line-height: 1.15; margin: 4px 0 8px; }
+.ttc .chap .cq { font-family: var(--font-serif); font-weight: 400; font-size: clamp(24px, 3.8vw, 34px); line-height: 1.15; margin: 4px 0 8px; }
 .ttc .chap .ca { margin: 0; max-width: 68ch; line-height: 1.5; font-size: 1.06em; }
 .ttc a.nxt { align-self: flex-start; color: var(--color-fg); text-decoration: none; border-bottom: 1px solid var(--color-fg-muted); font-size: var(--cds-font-size-caption); padding-bottom: 1px; }
 .ttc input.srch { width: 100%; max-width: 30rem; box-sizing: border-box; padding: 9px 12px; border: 1px solid var(--color-border-line); border-radius: 8px; background: var(--color-bg, var(--bg)); color: var(--color-fg); font: inherit; }
 .ttc .fres { margin-top: 12px; display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 10px; }
 .ttc .fres .cell { border: 1px solid var(--color-border-line); border-radius: 8px; padding: 10px 12px; }
 .ttc .fres .cell .lab { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
-.ttc .fres .cell .big { font-family: var(--font-anthropic-serif); font-size: 26px; font-variant-numeric: tabular-nums; }
+.ttc .fres .cell .big { font-family: var(--font-serif); font-size: 26px; font-variant-numeric: tabular-nums; }
 .ttc .reveal { margin: 12px 0 0; line-height: 1.5; max-width: 80ch; }
 @media (prefers-reduced-motion: reduce) { .ttc * { scroll-behavior: auto !important; } }
 .ttc { --ttc-red: #DA291C; }
@@ -145,6 +145,34 @@ a { color: inherit; }
 @media print { .ttc .jump, .ttc .cta { display: none !important; } }
 .ttc .asks li { margin: 6px 0; line-height: 1.5; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
+.ttc .chapnav { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.ttc .chapnav::-webkit-scrollbar { display: none; }
+.ttc .chapnav a { flex: 0 0 auto; }
+.ttc .tog, .ttc .jump a, .ttc .chapnav a { min-height: 36px; display: inline-flex; align-items: center; }
+.ttc input.srch { font-size: 16px; }
+@media (max-width: 600px) {
+  .ttc { gap: var(--cds-gap-md); }
+  .ttc .hero { padding: 18px 16px 16px; }
+  .ttc .hero h1 { font-size: clamp(25px, 7.4vw, 32px); line-height: 1.12; max-width: none; }
+  .ttc .hero .herosub { font-size: 1em; margin: 10px 0 6px; }
+  .ttc .jump { flex-direction: column; }
+  .ttc .jump a { justify-content: center; padding: 10px 14px; }
+  .ttc .card { padding: var(--cds-pad-md); }
+  .ttc .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--cds-gap-sm); }
+  .ttc .tile { padding: 12px; }
+  .ttc .tile .num { font-size: 26px; }
+  .ttc .tiles .tile:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .ttc .chap { padding-left: 12px; padding-top: 22px; }
+  .ttc .chap .ca { font-size: 1em; }
+  .ttc table { font-size: 12px; }
+  .ttc th, .ttc td { padding: 6px; }
+  .ttc .grid { grid-template-columns: minmax(0, 1fr); }
+  .ttc .fres { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ttc .cta { flex-direction: column; }
+  .ttc .cta a { text-align: center; }
+  .ttc a.pdfbtn { display: block; text-align: center; padding: 9px 12px; margin-bottom: 12px; }
+  .ttc a.nxt { padding: 8px 0; }
+}
 @media print { .ttc .tt { display: none; } .ttc .card { break-inside: avoid; } }
 </style>
 </head><body>
@@ -156,7 +184,7 @@ a { color: inherit; }
     <div class="kick">TTC subway delays, January 2014 to today</div>
     <h1 data-draw="hero_h" data-source="monthly">...</h1>
     <p class="herosub" data-draw="hero_p" data-source="monthly heat">...</p>
-    <div class="jump"><a class="pri" href="#ch-3" data-go="ch-3">Riders: take the 10 second test</a><a href="#ch-6" data-go="ch-6">Decision makers: options and questions</a></div>
+    <div class="jump"><a class="pri" href="#ch-3" data-go="ch-3">Riders: try the 10-second test</a><a href="#ch-6" data-go="ch-6">Decision makers: options and questions</a></div>
     <p class="sub">Data through <span data-draw="asof" data-source="kpi">...</span>, the latest the City has published; new data is added as it appears &middot; Source: City of Toronto Open Data, TTC Subway Delay Data &middot; page refreshed <span data-generated>...</span> &middot; independent analysis by Amir Patel &middot; <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a></p>
   </header>
   <div class="prog" data-draw="progress" data-source="kpi"></div>
@@ -258,7 +286,7 @@ a { color: inherit; }
   <section class="card adv">
     <h2>Station watchlist, last 12 months</h2>
     <p class="note">The 15 stations with the most delay minutes, against the 12 months before. Large swings can come from one or two long incidents, so read minutes per incident alongside the change.</p>
-    <div class="tbl"><table><thead><tr><th>Station</th><th>Minutes lost</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">Min / incident</th></tr></thead><tbody data-draw="watch_body" data-source="watch"></tbody></table></div>
+    <div class="tbl"><table><thead><tr><th>Station</th><th>Delay minutes</th><th class="n">vs prior</th><th class="n">Incidents</th><th class="n">Min / incident</th></tr></thead><tbody data-draw="watch_body" data-source="watch"></tbody></table></div>
   </section>
 
   <a class="nxt" href="#ch-5" data-go="ch-5">Next: why do they happen?</a>
@@ -406,6 +434,7 @@ const dash = (() => {
     if (parent) parent.appendChild(e);
     return e;
   };
+  document.addEventListener('pointerdown', (e) => { window.__ttcTouch = e.pointerType === 'touch'; }, true);
   const tint = (c, p) => `color-mix(in srgb, ${c} ${Math.round(p * 100)}%, transparent)`;
 
   // change vs a prior value; up is bad for delay measures
@@ -442,7 +471,7 @@ const dash = (() => {
     const li = (parts) => { const l = el$('li'); parts.forEach((p) => l.append(typeof p === 'string' ? document.createTextNode(p) : p)); return l; };
     const B = (t) => el$('b', null, t);
     const pm = Math.round(Math.abs((w.minL - w.minP) / w.minP) * 100), pi = Math.round(Math.abs((w.incL - w.incP) / w.incP) * 100);
-    items.push(li(['Over the last 12 months the subway lost ', B(fmt(w.minL)), ' minutes to delays, ' + dir(w.minL, w.minP) + ' ', B(pm + '%'), ' on the prior 12 months, across ', B(fmt(w.incL)), ' incidents (' + dir(w.incL, w.incP) + ' ' + pi + '%).']));
+    items.push(li(['Over the last 12 months the subway logged ', B(fmt(w.minL)), ' minutes of delay, ' + dir(w.minL, w.minP) + ' ', B(pm + '%'), ' on the prior 12 months, across ', B(fmt(w.incL)), ' incidents (' + dir(w.incL, w.incP) + ' ' + pi + '%).']));
     const pk = y.reduce((a, b) => (b.total_delay_min > a.total_delay_min ? b : a)), ly = y.filter((d) => d.yr < y[y.length - 1].yr).slice(-1)[0];
     items.push(li([B(String(pk.yr)), ' is the worst year on record at ', B(fmt(pk.total_delay_min)), ' minutes; ' + ly.yr + ' followed at ' + fmt(ly.total_delay_min) + '. Minutes now sit well above the 2014-2019 range of ' + fmt(d3.min(y.filter((d) => d.yr <= 2019), (d) => d.total_delay_min)) + ' to ' + fmt(d3.max(y.filter((d) => d.yr <= 2019), (d) => d.total_delay_min)) + '.']));
     const lines = ln.filter((d) => ['YU', 'BD', 'SHP'].includes(d.line)), tot = d3.sum(ln, (d) => d.cur_min);
@@ -466,9 +495,9 @@ const dash = (() => {
     const dl = (cur, prev, suffix) => { const d = el$('div', 'dl'); d.append(chgSpan(cur, prev), document.createTextNode(' ' + suffix)); return d; };
     const peak = (r) => 100 * r.peak_incidents / r.incidents;
     const tiles = [
-      tile('Minutes lost, last 12 months', fmt(w.minL), dl(w.minL, w.minP, 'vs prior 12 months'), 'Sum of delay on every incident'),
+      tile('Delay minutes, last 12 months', fmt(w.minL), dl(w.minL, w.minP, 'vs prior 12 months'), 'Sum of delay on every incident'),
       tile('Incidents, last 12 months', fmt(w.incL), dl(w.incL, w.incP, 'vs prior 12 months'), 'Includes incidents that logged zero minutes'),
-      tile('Minutes lost per day', fmt(Math.round(w.minL / 365)), dl(w.minL, w.minP, 'vs prior 12 months'), 'Last 12 months, every day of the year'),
+      tile('Delay minutes per day', fmt(Math.round(w.minL / 365)), dl(w.minL, w.minP, 'vs prior 12 months'), 'Last 12 months, every day of the year'),
       tile('Major incidents (30+ min), ' + full.yr, fmt(full.b4), dl(full.b4, b[b.length - 3].b4, 'vs ' + b[b.length - 3].yr), last.yr + ' so far: ' + fmt(last.b4) + ' through September'),
       tile('Share of minutes from major incidents, ' + full.yr, Math.round(100 * full.major_min / full.total_min) + '%', null, fmt(full.b4) + ' of ' + fmt(full.b1 + full.b2 + full.b3 + full.b4) + ' incidents with a delay'),
       tile('Peak-period share of incidents, ' + full.yr, Math.round(peak(full)) + '%', dl(peak(full), peak(b[b.length - 3]), 'vs ' + b[b.length - 3].yr), 'Weekday 06:00-09:59 and 15:00-18:59'),
@@ -484,12 +513,12 @@ const dash = (() => {
       show(head, lines, x, y) {
         t.replaceChildren(); t.appendChild(el$('div', 'h', head));
         lines.forEach((l) => t.appendChild(el$('div', null, l)));
-        t.hidden = false;
+        clearTimeout(t._h); t.hidden = false;
         const w = el.clientWidth, tw = t.offsetWidth;
         t.style.left = Math.max(0, Math.min(w - tw, x + 12)) + 'px';
         t.style.top = Math.max(0, y - 8) + 'px';
       },
-      hide() { t.hidden = true; }
+      hide() { clearTimeout(t._h); if (window.__ttcTouch) { t._h = setTimeout(() => { t.hidden = true; }, 2600); } else { t.hidden = true; } }
     };
   }
 
@@ -710,23 +739,26 @@ const dash = (() => {
     function render() {
       btns.forEach(([y, b]) => { b.className = 'tog' + (y === calYear ? ' on' : ''); b.setAttribute('aria-pressed', String(y === calYear)); });
       wrap.replaceChildren();
-      const yd = days.filter((x) => x.date.getUTCFullYear() === calYear);
-      const W = Math.max(wrap.clientWidth, 320), left = 30, cell = (W - left - 4) / 54, H = 7 * cell + 30;
+      const sc = el$('div'); sc.style.overflowX = 'auto'; wrap.append(sc); const yd = days.filter((x) => x.date.getUTCFullYear() === calYear);
+      const left = 30, narrow = wrap.clientWidth < 580, W = narrow ? 580 : Math.max(wrap.clientWidth, 320), cell = (W - left - 4) / 54, H = 7 * cell + 30;
       const jan1 = new Date(Date.UTC(calYear, 0, 1)), off = (jan1.getUTCDay() + 6) % 7;
-      const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Daily minutes of delay in ' + calYear }, wrap);
+      const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, width: '100%', role: 'img', 'aria-label': 'Daily minutes of delay in ' + calYear }, sc);
+      if (narrow) { svg.style.width = W + 'px'; svg.style.maxWidth = 'none'; }
       ['Mon', '', 'Wed', '', 'Fri', '', 'Sun'].forEach((t, i) => { if (t) svgEl('text', { x: left - 5, y: 18 + i * cell + cell * 0.7, 'text-anchor': 'end' }, svg).textContent = t; });
-      const seen = new Set(), tip = tooltip(wrap);
+      const seen = new Set(), tip = tooltip(wrap), readout = el$('div', 'key'); readout.style.marginTop = '6px';
+      const showDay = (x) => { readout.textContent = d3.utcFormat('%a %-d %b %Y')(x.date) + ': ' + fmt(x.m) + ' minutes, ' + fmt(x.n) + ' incidents'; };
       yd.forEach((x) => {
         const doy = Math.round((x.date - jan1) / 86400000), wk = Math.floor((doy + off) / 7), wd = (x.date.getUTCDay() + 6) % 7;
         const mo = x.date.getUTCMonth();
         if (!seen.has(mo)) { seen.add(mo); svgEl('text', { x: left + wk * cell, y: 11, 'text-anchor': 'start' }, svg).textContent = d3.utcFormat('%b')(x.date); }
         const c = svgEl('rect', { x: left + wk * cell, y: 18 + wd * cell, width: Math.max(1, cell - 1.6), height: Math.max(1, cell - 1.6), rx: 2, fill: dash.colors[0], 'fill-opacity': 0.07 + 0.93 * Math.min(1, x.m / p95) }, svg);
-        c.addEventListener('pointermove', (ev) => { const eb = wrap.getBoundingClientRect(); tip.show(d3.utcFormat('%a %-d %b %Y')(x.date), [fmt(x.m) + ' minutes', fmt(x.n) + ' incidents'], ev.clientX - eb.left, ev.clientY - eb.top); });
+        c.addEventListener('click', () => { if (narrow) showDay(x); }); c.addEventListener('pointermove', (ev) => { if (narrow) return; const eb = wrap.getBoundingClientRect(); tip.show(d3.utcFormat('%a %-d %b %Y')(x.date), [fmt(x.m) + ' minutes', fmt(x.n) + ' incidents'], ev.clientX - eb.left, ev.clientY - eb.top); });
         c.addEventListener('pointerleave', () => tip.hide());
       });
       const worst = yd.reduce((a, b) => (b.m > a.m ? b : a));
       const note = el$('div', 'key', 'Worst day in ' + calYear + ': ' + d3.utcFormat('%-d %B')(worst.date) + ', ' + fmt(worst.m) + ' minutes across ' + fmt(worst.n) + ' incidents. Darkest colour is ' + fmt(p95) + ' minutes or more (the 95th percentile of all days).');
       note.style.marginTop = '6px'; wrap.append(note);
+      if (narrow) { readout.textContent = 'Tap a day to see its total.'; wrap.append(readout); }
     }
     render();
   });
@@ -855,7 +887,7 @@ const dash = (() => {
 
   dash.draw('hero_h', (el) => {
     const m = rows('monthly'); if (!m || m.length < 24) { dashT(el); return; }
-    const w = windows(m), txt = (v) => 'The TTC subway lost ' + fmt(Math.round(v)) + ' minutes to delays in the last 12 months.';
+    const w = windows(m), txt = (v) => 'The TTC subway logged ' + fmt(Math.round(v)) + ' minutes of delays in the last 12 months.';
     el.textContent = txt(w.minL);
     if (!heroDone && !reduced) {
       heroDone = true; const t0 = performance.now();
@@ -866,7 +898,7 @@ const dash = (() => {
   dash.draw('hero_p', (el) => {
     const m = rows('monthly'), h = rows('heat'); if (!m || m.length < 24 || !h || !h.length) { dashT(el); return; }
     const w = windows(m);
-    el.textContent = 'That is about ' + fmt(Math.round(w.minL / 1440)) + ' days of trains held up, non-stop, or ' + fmt(Math.round(w.minL / 365)) + ' minutes every day. Scroll to see when and where it happens, why, and what could change it. One hour of the week may surprise you.';
+    el.textContent = 'Every delay the TTC recorded, added up: about ' + fmt(Math.round(w.minL / 365)) + ' minutes a day, across ' + fmt(w.incL) + ' incidents. These are train delay minutes, not time lost by each rider. Scroll to see when, where and why, and what could change it.';
   });
   dash.draw('chapnav', (nav) => {
     nav.replaceChildren(...CHAPS.map(([id, lab], i) => { const a = el$('a', null, (i + 1) + ' ' + lab); a.href = '#' + id; a.setAttribute('data-go', id); return a; }));
