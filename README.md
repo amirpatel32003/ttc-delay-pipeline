@@ -8,6 +8,8 @@ exposes analytics tables that answer questions like *which stations lose the mos
 >
 > **Live dashboard:** https://amirpatel32003.github.io/ttc-delay-pipeline/
 
+[![TTC subway delay dashboard](docs/dashboard/assets/post-card.png)](https://amirpatel32003.github.io/ttc-delay-pipeline/)
+
 ## Architecture
 
 ```mermaid

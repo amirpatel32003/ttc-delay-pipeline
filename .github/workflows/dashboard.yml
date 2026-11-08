@@ -29,6 +29,7 @@ jobs:
         run: |
           PYTHONPATH=src python -m ttc_pipeline.cli export --out site/dashboard_data.json
           cp docs/dashboard/index.html site/index.html
+          cp -r docs/dashboard/assets site/assets
       - name: Render the downloadable PDF report
         run: |
           pip install playwright
