@@ -142,7 +142,7 @@ a { color: inherit; }
 .ttc .cta { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
 .ttc .cta a { text-decoration: none; border-radius: 8px; padding: 10px 16px; border: 1px solid var(--color-border-line); color: var(--color-fg); font-weight: 600; }
 .ttc .cta a.pri { background: var(--ttc-red); border-color: var(--ttc-red); color: #fff; }
-@media print { .ttc .jump, .ttc .cta { display: none !important; } }
+@media print { .ttc .jump, .ttc .cta { display: none !important; } .ttc .brief, .ttc .start { break-inside: auto !important; } }
 .ttc .asks li { margin: 6px 0; line-height: 1.5; }
 .ttc .foot { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); }
 .ttc .chapnav { scrollbar-width: none; -webkit-overflow-scrolling: touch; }
@@ -323,7 +323,7 @@ a { color: inherit; }
   <div class="chap" id="ch-6"><div class="ck">Chapter 6 of 7</div><h2 class="cq">What could change it, and who decides?</h2><p class="ca" data-draw="ans_6" data-source="group_ltm">...</p></div>
   <section class="card">
     <h2>What this suggests, and who can act on it</h2>
-    <p class="say">The people who can change these numbers are the people who run and fund the subway: TTC management, its Board and the City of Toronto. They have the operating detail this public data lacks. The data shows where and when time is lost and what kind of problem it was. It cannot show which fix would work or what it would cost, so the options below are questions to evaluate, not recommendations.</p>
+    <p class="say">The people who can change these numbers are the people who run and fund the subway: TTC management, its Board and the City of Toronto. They have the operating detail this public data lacks. The data shows where and when delay minutes pile up and what kind of problem it was. It cannot show which fix would work or what it would cost, so the options below are questions to evaluate, not recommendations.</p>
     <ul class="ev" data-draw="decide" data-source="group_ltm watch monthly heat buckets"></ul>
   </section>
 
@@ -478,9 +478,9 @@ const dash = (() => {
     const top = lines[0], rise = lines.reduce((a, b) => ((b.cur_min - b.prev_min) > (a.cur_min - a.prev_min) ? b : a));
     items.push(li([B(LINE[top.line]), ' accounts for ', B(Math.round(100 * top.cur_min / tot) + '%'), ' of last-12-month minutes. ', B(LINE[rise.line]), ' added the most minutes against the prior year (' + (rise.cur_min >= rise.prev_min ? '+' : '-') + fmt(Math.abs(rise.cur_min - rise.prev_min)) + ').']));
     const c1 = ca[0], cr = ca.reduce((a, b) => ((b.cur_min - b.prev_min) > (a.cur_min - a.prev_min) ? b : a));
-    items.push(li(['The largest single cause is ', B(c1.description.toLowerCase()), ' (' + fmt(c1.cur_min) + ' minutes). The biggest increase is ', B(cr.description.toLowerCase()), ', ' + fmt(cr.prev_min) + ' to ' + fmt(cr.cur_min) + ' minutes' + (cr.cur_inc < 100 ? ', from just ' + fmt(cr.cur_inc) + ' incidents' : '') + '.']));
+    items.push(li(['The largest single cause is ', B(c1.description.toLowerCase().replace(/\bpaa\b/g, 'passenger assistance alarm')), ' (' + fmt(c1.cur_min) + ' minutes). The biggest increase is ', B(cr.description.toLowerCase().replace(/\bpaa\b/g, 'passenger assistance alarm')), ', ' + fmt(cr.prev_min) + ' to ' + fmt(cr.cur_min) + ' minutes' + (cr.cur_inc < 100 ? ', from just ' + fmt(cr.cur_inc) + ' incidents' : '') + '.']));
     const wr = wa.reduce((a, b) => (((b.cur_min || 0) - (b.prev_min || 0)) > ((a.cur_min || 0) - (a.prev_min || 0)) ? b : a));
-    items.push(li(['Among the 15 worst stations, ', B(wr.station), ' rose most, ' + fmt(wr.prev_min || 0) + ' to ' + fmt(wr.cur_min) + ' minutes; ', B(wa[0].station), ' lost the most time.']));
+    items.push(li(['Among the 15 worst stations, ', B(((x) => x.toLowerCase().replace(/appraoching/, 'approaching').replace(/\b\w/g, (c) => c.toUpperCase()))(wr.station)), ' rose most, ' + fmt(wr.prev_min || 0) + ' to ' + fmt(wr.cur_min) + ' minutes; ', B(((x) => x.toLowerCase().replace(/appraoching/, 'approaching').replace(/\b\w/g, (c) => c.toUpperCase()))(wa[0].station)), ' had the most delay minutes.']));
     ul.replaceChildren(...items);
   });
 
@@ -605,10 +605,10 @@ const dash = (() => {
     return r.map((d) => {
       const cell = el$('span'); const bar = el$('span', 'mini'); bar.style.width = Math.max(2, 120 * d.cur_min / mx) + 'px'; bar.style.background = dash.colors[0];
       cell.append(bar, document.createTextNode(fmt(d.cur_min)));
-      return [[d.station], [cell], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n'], [(d.cur_min / d.cur_inc).toFixed(1), 'n']];
+      return [[((x) => x.toLowerCase().replace(/appraoching/, 'approaching').replace(/\b\w/g, (c) => c.toUpperCase()))(d.station)], [cell], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n'], [(d.cur_min / d.cur_inc).toFixed(1), 'n']];
     });
   });
-  body('cause_body', 'causes_ltm', (r) => r.map((d) => [[d.description.charAt(0) + d.description.slice(1).toLowerCase()], [fmt(d.cur_min), 'n'], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n']]));
+  body('cause_body', 'causes_ltm', (r) => r.map((d) => [[(d.description.charAt(0) + d.description.slice(1).toLowerCase()).replace(/\bpaa\b/gi, 'Passenger assistance alarm')], [fmt(d.cur_min), 'n'], [chgSpan(d.cur_min, d.prev_min), 'n'], [fmt(d.cur_inc), 'n']]));
   body('checks_body', 'checks', (r) => r.map((d) => [[d.name.replace(/_/g, ' ')], [d.passed ? 'pass' : 'fail', d.passed ? 'ok' : 'bad']]));
   body('ingest_body', 'ingestion', (r) => r.map((d) => [[d.name.replace(/^TTC Subway Delay Data /, '').replace('ttc-subway-delay-data-', '')], [String(d.last_modified).slice(0, 10)], [fmt(d.rows), 'n']]));
 
@@ -621,7 +621,7 @@ const dash = (() => {
     thead.append(hr);
     const tb = el$('tbody');
     codes.forEach(([code, o]) => {
-      const tr = el$('tr'); tr.append(el$('td', null, o.d.charAt(0) + o.d.slice(1).toLowerCase()));
+      const tr = el$('tr'); tr.append(el$('td', null, (o.d.charAt(0) + o.d.slice(1).toLowerCase()).replace(/\bpaa\b/gi, 'Passenger assistance alarm')));
       const vals = years.map((y) => (r.find((q) => q.code === code && q.yr === y) || {}).total_min || 0), mx = d3.max(vals);
       vals.forEach((v, i) => { const td = el$('td', 'cell', v ? cmp.format(v) : '-'); td.style.background = tint(dash.colors[0], 0.1 + 0.6 * v / mx); td.title = years[i] + ': ' + fmt(v) + ' minutes'; tr.append(td); });
       tb.append(tr);
@@ -825,7 +825,7 @@ const dash = (() => {
     const topShare = d3.sum(w, (d) => d.cur_min) / win.minL;
     items.push(li('The 15 stations with the most delay minutes account for ', B(Math.round(100 * topShare) + '%'), ' of all minutes in the last 12 months, out of hundreds of stations. Station-level reviews could reach a lot of the problem, though a few of those minutes come from single long incidents.'));
     const full = b[b.length - 2];
-    items.push(li('Incidents of 30 minutes or more are about ', B(Math.round(100 * full.b4 / (full.b1 + full.b2 + full.b3 + full.b4)) + '%'), ' of delays that lost time in ' + full.yr + ' but ', B(Math.round(100 * full.major_min / full.total_min) + '%'), ' of the minutes. How quickly a long incident is cleared and service recovered is where a lot of time is at stake.'));
+    items.push(li('Incidents of 30 minutes or more are about ', B(Math.round(100 * full.b4 / (full.b1 + full.b2 + full.b3 + full.b4)) + '%'), ' of delays in ' + full.yr + ' but ', B(Math.round(100 * full.major_min / full.total_min) + '%'), ' of the minutes. How quickly a long incident is cleared and service recovered is where a lot of time is at stake.'));
     ul.replaceChildren(...items);
   });
 
@@ -909,9 +909,11 @@ const dash = (() => {
         const t = document.getElementById(a.getAttribute('data-go')); if (!t) return;
         ev.preventDefault(); t.scrollIntoView({ behavior: reduced ? 'auto' : 'smooth', block: 'start' });
       });
-      if ('IntersectionObserver' in window) {
-        const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { navCurrent = e.target.id; markNav(); } }), { rootMargin: '-15% 0px -75% 0px' });
-        CHAPS.forEach(([id]) => { const t = document.getElementById(id); if (t) io.observe(t); });
+      {
+        let tick = false;
+        const upd = () => { tick = false; let cur = CHAPS[0][0]; const line = window.innerHeight * 0.3; CHAPS.forEach(([id]) => { const t = document.getElementById(id); if (t && t.getBoundingClientRect().top <= line) cur = id; }); if (cur !== navCurrent) { navCurrent = cur; markNav(); } };
+        const req = () => { if (!tick) { tick = true; requestAnimationFrame(upd); } };
+        window.addEventListener('scroll', req, { passive: true }); window.addEventListener('resize', req); upd();
       }
     }
     markNav();
@@ -929,7 +931,7 @@ const dash = (() => {
   const pctUp = (a, b) => { const p = Math.round(Math.abs((a - b) / b) * 100); return p + '% ' + (a >= b ? 'higher' : 'lower'); };
   answer('ans_1', () => { const m = rows('monthly'); if (!m || m.length < 24) return null; const w = windows(m); return fmt(w.minL) + ' minutes in the last 12 months, ' + pctUp(w.minL, w.minP) + ' than the 12 months before, across ' + fmt(w.incL) + ' incidents.'; });
   answer('ans_2', () => { const y = rows('yearly'); if (!y || y.length < 4) return null; const full = y[y.length - 2], b19 = y.find((d) => d.yr === 2019), pk = y.reduce((a, c) => (c.total_delay_min > a.total_delay_min ? c : a)); return (b19 ? full.yr + ' logged ' + pctUp(full.total_delay_min, b19.total_delay_min) + ' delay minutes than 2019, the last full year before the pandemic. ' : '') + 'The worst year on record is ' + pk.yr + '.'; });
-  answer('ans_3', () => { const h = rows('heat'); if (!h || !h.length) return null; return 'Delays are not spread evenly across the week, and the busiest hour for incidents is not the costliest hour for lost minutes. Take the quick test, then read the maps.'; });
+  answer('ans_3', () => { const h = rows('heat'); if (!h || !h.length) return null; return 'Delays are not spread evenly across the week, and the busiest hour for incidents is not the costliest hour for delay minutes. Take the quick test, then read the maps.'; });
   answer('ans_4', () => { const l = rows('line_ltm'), w = rows('watch'), m = rows('monthly'); if (!l || !w || !m || m.length < 24) return null; const tot = d3.sum(l, (d) => d.cur_min), top = l.filter((d) => ['YU', 'BD', 'SHP'].includes(d.line))[0]; return LINE[top.line] + ' accounts for ' + Math.round(100 * top.cur_min / tot) + '% of minutes in the last 12 months, and the 15 worst stations account for ' + Math.round(100 * d3.sum(w, (d) => d.cur_min) / windows(m).minL) + '%.'; });
   answer('ans_5', () => { const g = rows('group_ltm'); if (!g || !g.length) return null; const tot = d3.sum(g, (d) => d.cur_min), s = g.filter((d) => d.grp !== 'Other and unclassified'); return s[0].grp + ' causes ' + Math.round(100 * s[0].cur_min / tot) + '% of delay minutes; the next largest group is ' + s[1].grp.toLowerCase() + ' at ' + Math.round(100 * s[1].cur_min / tot) + '%.'; });
   answer('ans_6', () => { const g = rows('group_ltm'); if (!g || !g.length) return null; const tot = d3.sum(g, (d) => d.cur_min), s = g.filter((d) => d.grp !== 'Other and unclassified').slice(0, 3); return 'The three largest cause groups, ' + s[0].grp.toLowerCase() + ', ' + s[1].grp.toLowerCase() + ' and ' + s[2].grp.toLowerCase() + ', make up ' + Math.round(100 * d3.sum(s, (d) => d.cur_min) / tot) + '% of minutes. Each calls for a different kind of response, and the decisions sit with TTC management, its Board and the City.'; });
@@ -961,7 +963,7 @@ const dash = (() => {
     el.replaceChildren();
     const inp = el$('input', 'srch'); inp.type = 'search'; inp.placeholder = 'Type a station, for example Kennedy or Union'; inp.setAttribute('aria-label', 'Station name'); inp.value = finderQ;
     const list = el$('div', 'keys'); list.style.marginTop = '8px'; const out = el$('div'); el.append(inp, list, out);
-    const title = (s) => s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+    const title = (s) => s.toLowerCase().replace(/appraoching/, 'approaching').replace(/\b\w/g, (c) => c.toUpperCase());
     function showList() {
       const q = inp.value.trim().toUpperCase(); list.replaceChildren(); if (!q) return;
       const hits = st.filter((d) => d.station.includes(q)).slice(0, 8);
@@ -1003,7 +1005,7 @@ const dash = (() => {
       li(title2(st.station) + ' leads the last 12 months watchlist with ' + fmt(st.cur_min) + ' minutes. Which stations get a published action plan, and where can riders follow progress?')
     );
   });
-  function title2(s) { return s.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()); }
+  function title2(s) { return s.toLowerCase().replace(/appraoching/, 'approaching').replace(/\b\w/g, (c) => c.toUpperCase()); }
 
   document.addEventListener('change', (ev) => { if (ev.target && ev.target.id === 'fulldetail') { window.dispatchEvent(new Event('resize')); setTimeout(() => window.dispatchEvent(new Event('resize')), 150); } });
 })();
