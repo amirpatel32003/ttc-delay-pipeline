@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Subway delays near a Toronto apartment</title>
+<meta name="description" content="Compare how many delay minutes two Toronto subway stations logged in the last 12 months. Updated daily from the City of Toronto's open data.">
+<style>
+:root{--ink:#1b1b1b;--mut:#5b5b57;--line:#dcdcd6;--bg:#fafaf7;--red:#da291c;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+main{max-width:760px;margin:0 auto;padding:28px 18px 56px}
+h1{font-size:clamp(26px,6vw,38px);line-height:1.12;margin:0 0 10px}
+.lede{color:var(--mut);margin:0 0 22px;max-width:60ch}
+.pick{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.pick{grid-template-columns:1fr}}
+label{display:block;font-weight:600;font-size:.9em;margin-bottom:4px}
+select{width:100%;padding:12px;font:inherit;border:1px solid var(--line);border-radius:8px;background:#fff;min-height:48px}
+:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+@media(max-width:560px){.cards{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;border-top:5px solid var(--red)}
+.card h2{font-size:1.15rem;margin:0 0 2px}
+.band{font-weight:700;margin:2px 0 10px}
+.big{font-size:2rem;font-weight:700;line-height:1.1}
+.sub{color:var(--mut);font-size:.88em}
+.row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-top:1px solid var(--line);font-size:.95em}
+#verdict{margin:18px 0 0;padding:14px 16px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.note{margin-top:26px;color:var(--mut);font-size:.9em}
+.note p{margin:0 0 10px}
+a{color:#a31a11}
+.empty{margin-top:18px;color:var(--mut)}
+</style>
+</head>
+<body>
+<main>
+<h1>How much do the subway stations near an apartment get held up?</h1>
+<p class="lede">Pick the nearest station to each place you are looking at. You will see how many delay minutes each station logged in the last 12 months, and how that compares with the other stations.</p>
+
+<div class="pick">
+  <div><label for="a">Station A</label><select id="a" aria-describedby="status"></select></div>
+  <div><label for="b">Station B (optional)</label><select id="b"></select></div>
+</div>
+<p id="status" class="sub" role="status">Loading the latest data...</p>
+<div id="cards" class="cards" aria-live="polite"></div>
+<div id="verdict" hidden></div>
+
+<div class="note">
+<p><strong>Read this first.</strong> These are minutes that trains were held up at or near a station, as logged by the TTC. They do not count how many riders were affected, and they are not adjusted for how busy a station is. Large interchanges tend to log more delays simply because more happens there. Use this as one input next to your own commute.</p>
+<p>Data: City of Toronto Open Data, TTC Subway Delay Data, through <span id="asof">...</span>. Rebuilt every day. Station names in the raw data appear under many spellings, so related entries are combined here. Entries for yards and car houses are left out. Independent project by Amir Patel, not an official TTC product. <a href="../">Full dashboard</a> and <a href="https://github.com/amirpatel32003/ttc-delay-pipeline">source code</a>.</p>
+</div>
+</main>
+<script>
+(function(){
+  // Rider-facing stations. Longest match wins, so FINCH WEST is not counted as FINCH.
+  var STATIONS=["Finch","North York Centre","Sheppard-Yonge","York Mills","Lawrence","Eglinton","Davisville","St Clair","Summerhill","Rosedale","Bloor-Yonge","Wellesley","College","Dundas","Queen","King","Union","St Andrew","Osgoode","St Patrick","Queen's Park","Museum","St George","Spadina","Dupont","St Clair West","Eglinton West","Glencairn","Lawrence West","Yorkdale","Wilson","Sheppard West","Downsview Park","Finch West","York University","Pioneer Village","Highway 407","Vaughan Metropolitan Centre","Kipling","Islington","Royal York","Old Mill","Jane","Runnymede","High Park","Keele","Dundas West","Lansdowne","Dufferin","Ossington","Christie","Bathurst","Bay","Sherbourne","Castle Frank","Broadview","Chester","Pape","Donlands","Greenwood","Coxwell","Woodbine","Main Street","Victoria Park","Warden","Kennedy","Bayview","Bessarion","Leslie","Don Mills"];
+  var ALIASES={"VMC":"Vaughan Metropolitan Centre","KILPING":"Kipling","GLENCARIN":"Glencairn","LANDOWNE":"Lansdowne","QUEENS PARK":"Queen's Park","NORTH YORK CTR":"North York Centre","SHEPPARD YONGE":"Sheppard-Yonge","BLOOR":"Bloor-Yonge","YONGE":"Bloor-Yonge","BLOOR YONGE":"Bloor-Yonge","ST CLAIR & BLOOR":"St Clair"};
+  var SKIP=/YARD|CARHOUSE|HOSTLER|WYE|BUILD.?UP|CHANGE OVERS|VARIOUS|EMERGENCY|BRIDGE|MASSEY|TAIL TRACK|CENTRE TRACK/;
+  var NORM=function(s){return s.toUpperCase().replace(/^(APPROACHING|ENTERING|LEAVING)\s*-?\s*/,'').replace(/[-.()#]/g,' ').replace(/\s+/g,' ').trim();};
+  var CANON=STATIONS.map(function(n){return {name:n,key:NORM(n)};}).sort(function(x,y){return y.key.length-x.key.length;});
+  function match(v){
+    var s=NORM(v); if(SKIP.test(s)) return null;
+    for(var k in ALIASES){ if(s===k) return ALIASES[k]; }
+    for(var i=0;i<CANON.length;i++){ var c=CANON[i].key; if(s===c || s.indexOf(c+' ')===0) return CANON[i].name; }
+    return null;
+  }
+  var $=function(id){return document.getElementById(id);}, fmt=function(n){return Math.round(n).toLocaleString('en-CA');};
+  var data=[], bands=[];
+  function build(raw){
+    var m={};
+    raw.stations_all.forEach(function(d){
+      var n=match(d.station); if(!n) return;
+      var o=m[n]||(m[n]={name:n,cur:0,prev:0,total:0,inc:0}); o.cur+=d.cur_min; o.prev+=d.prev_min; o.total+=d.total_min; o.inc+=d.incidents;
+    });
+    data=Object.keys(m).map(function(k){return m[k];}).filter(function(o){return o.total>0;}).sort(function(x,y){return y.cur-x.cur;});
+    data.forEach(function(o,i){o.rank=i+1; o.pct=Math.round(100*(data.length-o.rank)/data.length);});
+  }
+  function band(o){
+    var q=o.rank/data.length;
+    return q<=.25?'Among the most delay minutes':q<=.5?'More delay minutes than most':q<=.75?'Fewer delay minutes than most':'Among the fewest delay minutes';
+  }
+  function change(o){
+    if(!o.prev) return 'No comparison available';
+    var p=Math.round(100*(o.cur-o.prev)/o.prev);
+    return (p>0?'Up ':p<0?'Down ':'No change ')+(p?Math.abs(p)+'% ':'')+'on the 12 months before';
+  }
+  function card(o){
+    var d=document.createElement('div'); d.className='card';
+    d.innerHTML='<h2></h2><div class="band"></div><div class="big"></div><div class="sub">delay minutes, last 12 months</div>'+
+      '<div class="row"><span>Rank</span><span></span></div><div class="row"><span>Trend</span><span></span></div><div class="row"><span>Average per incident, since 2014</span><span></span></div>';
+    d.querySelector('h2').textContent=o.name+' station';
+    d.querySelector('.band').textContent=band(o);
+    d.querySelector('.big').textContent=fmt(o.cur);
+    var r=d.querySelectorAll('.row span:last-child');
+    r[0].textContent='#'+o.rank+' of '+data.length; r[1].textContent=change(o); r[2].textContent=(o.total/o.inc).toFixed(1)+' min';
+    return d;
+  }
+  function render(){
+    var a=data.filter(function(x){return x.name===$('a').value;})[0], b=data.filter(function(x){return x.name===$('b').value;})[0];
+    var box=$('cards'); box.replaceChildren(); var v=$('verdict'); v.hidden=true;
+    if(!a){box.innerHTML='<p class="empty">Choose a station to see its numbers.</p>'; return;}
+    box.append(card(a)); if(b) box.append(card(b));
+    if(a&&b&&a!==b){
+      var hi=a.cur>=b.cur?a:b, lo=hi===a?b:a, r=lo.cur?hi.cur/lo.cur:0;
+      v.textContent=r>=1.25?hi.name+' logged about '+r.toFixed(1)+' times the delay minutes of '+lo.name+' over the last 12 months ('+fmt(hi.cur)+' against '+fmt(lo.cur)+').':'The two stations logged similar delay minutes over the last 12 months ('+fmt(a.cur)+' at '+a.name+' and '+fmt(b.cur)+' at '+b.name+').';
+      v.hidden=false;
+    }
+    history.replaceState(null,'','#'+encodeURIComponent($('a').value)+(b?'/'+encodeURIComponent(b.name):''));
+  }
+  function fill(sel,optional){
+    sel.innerHTML=''; var o=document.createElement('option'); o.value=''; o.textContent=optional?'None':'Choose a station'; sel.append(o);
+    data.slice().sort(function(x,y){return x.name<y.name?-1:1;}).forEach(function(d){var p=document.createElement('option'); p.value=d.name; p.textContent=d.name; sel.append(p);});
+  }
+  fetch('../dashboard_data.json',{cache:'no-cache'}).then(function(r){if(!r.ok) throw 0; return r.json();}).then(function(raw){
+    build(raw); fill($('a'),false); fill($('b'),true);
+    var h=decodeURIComponent(location.hash.slice(1)).split('/'); if(h[0]) $('a').value=h[0]; if(h[1]) $('b').value=h[1];
+    $('status').textContent=data.length+' stations. Pick one or two.';
+    var t=new Date(raw.asof+'T12:00:00'); $('asof').textContent=t.toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
+    $('a').onchange=$('b').onchange=render; render();
+  }).catch(function(){ $('status').textContent='The data could not be loaded. Refresh the page, or open the full dashboard.'; });
+})();
+</script>
+</body>
+</html>

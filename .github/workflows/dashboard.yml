@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: ["docs/dashboard/**", "src/ttc_pipeline/export.py", ".github/workflows/dashboard.yml"]
+    paths: ["docs/dashboard/**", "docs/renters/**", "src/ttc_pipeline/export.py", ".github/workflows/dashboard.yml"]
 permissions:
   contents: read
   pages: write
@@ -31,6 +31,7 @@ jobs:
           PYTHONPATH=src python -m ttc_pipeline.cli export --out site/dashboard_data.json
           cp docs/dashboard/index.html site/index.html
           cp -r docs/dashboard/assets site/assets
+          cp -r docs/renters site/renters
       - name: Write a small stats file for other sites to read
         run: |
           python - <<'PY'
