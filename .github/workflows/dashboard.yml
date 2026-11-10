@@ -31,6 +31,25 @@ jobs:
           PYTHONPATH=src python -m ttc_pipeline.cli export --out site/dashboard_data.json
           cp docs/dashboard/index.html site/index.html
           cp -r docs/dashboard/assets site/assets
+      - name: Write a small stats file for other sites to read
+        run: |
+          python - <<'PY'
+          import json
+          d = json.load(open("site/dashboard_data.json"))
+          m = d["monthly"]
+          last, prev = m[-12:], m[-24:-12]
+          s = lambda a, k: sum(x[k] for x in a)
+          out = {
+              "minutes_last_12_months": s(last, "total_delay_min"),
+              "incidents_last_12_months": s(last, "incidents"),
+              "minutes_prior_12_months": s(prev, "total_delay_min"),
+              "minutes_per_day": round(s(last, "total_delay_min") / 365),
+              "data_through": d["asof"],
+              "generated_at": d["generated_at"],
+          }
+          json.dump(out, open("site/stats.json", "w"), indent=1)
+          print(out)
+          PY
       - name: Render the downloadable PDF report
         run: |
           pip install playwright
