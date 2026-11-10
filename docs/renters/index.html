@@ -3,8 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Subway delays near a Toronto apartment</title>
-<meta name="description" content="Compare how many delay minutes two Toronto subway stations logged in the last 12 months. Updated daily from the City of Toronto's open data.">
+<title>Rent vs subway delays: compare two Toronto apartments</title>
+<meta name="description" content="Comparing two Toronto apartments? Enter the rent and nearest subway station for each and see the rent difference next to the station's delay record. Free, updated daily from City of Toronto open data.">
+<meta property="og:title" content="Rent vs subway delays: compare two Toronto apartments"><meta property="og:description" content="Enter rent and nearest station for two places. See the rent gap and each station's delay record. Updated daily."><meta property="og:type" content="website"><meta name="theme-color" content="#da291c">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Rent vs subway delays","applicationCategory":"UtilitiesApplication","operatingSystem":"Any","offers":{"@type":"Offer","price":"0","priceCurrency":"CAD"},"description":"Compare two Toronto apartments by rent and the delay record of the nearest subway station."}</script>
 <style>
 :root{--ink:#1b1b1b;--mut:#5b5b57;--line:#dcdcd6;--bg:#fafaf7;--red:#da291c;--card:#fff}
 *{box-sizing:border-box}
@@ -30,20 +32,40 @@ select{width:100%;padding:12px;font:inherit;border:1px solid var(--line);border-
 .note p{margin:0 0 10px}
 a{color:#a31a11}
 .empty{margin-top:18px;color:var(--mut)}
+input[type=number]{width:100%;padding:12px;font:inherit;border:1px solid var(--line);border-radius:8px;background:#fff;min-height:48px}
+.rent{margin-top:8px}
+.good{border-left:5px solid #1a7f4b}
+#verdict p{margin:0 0 8px}#verdict p:last-child{margin:0}
+details.all{margin-top:26px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:4px 16px}
+details.all summary{cursor:pointer;font-weight:600;padding:12px 0;min-height:44px}
+#q{width:100%;padding:12px;font:inherit;border:1px solid var(--line);border-radius:8px;margin:4px 0 8px;min-height:48px}
+table{width:100%;border-collapse:collapse;font-size:.95em;margin-bottom:12px}
+th,td{text-align:left;padding:9px 6px;border-top:1px solid var(--line)}
+td:nth-child(n+3),th:nth-child(n+3){text-align:right}
+tr.pickable{cursor:pointer}tr.pickable:hover{background:#f3f3ee}
+.tbtn{background:none;border:0;font:inherit;color:#a31a11;text-decoration:underline;cursor:pointer;padding:6px 0;min-height:36px}
+.steps{display:flex;gap:18px;flex-wrap:wrap;color:var(--mut);font-size:.9em;margin:0 0 18px;padding:0;list-style:none}
+@media(prefers-reduced-motion:no-preference){.card{animation:in .25s ease-out}@keyframes in{from{opacity:.4;transform:translateY(4px)}}}
 </style>
 </head>
 <body>
 <main>
-<h1>How much do the subway stations near an apartment get held up?</h1>
-<p class="lede">Pick the nearest station to each place you are looking at. You will see how many delay minutes each station logged in the last 12 months, and how that compares with the other stations.</p>
+<h1>Rent against subway delays: compare two Toronto apartments</h1>
+<p class="lede">Choose the nearest subway station to each place you are considering, and add the monthly rent if you like. You will see how much you would save or pay, next to how many delay minutes each station logged in the last 12 months.</p>
+<ol class="steps"><li>1. Pick a station</li><li>2. Add the rent</li><li>3. Compare</li></ol>
 
 <div class="pick">
-  <div><label for="a">Station A</label><select id="a" aria-describedby="status"></select></div>
-  <div><label for="b">Station B (optional)</label><select id="b"></select></div>
+  <div><label for="a">Place A: nearest station</label><select id="a" aria-describedby="status"></select><div class="rent"><label for="ra">Place A: monthly rent (optional)</label><input id="ra" type="number" inputmode="numeric" min="0" step="50" placeholder="e.g. 1900"></div></div>
+  <div><label for="b">Place B: nearest station (optional)</label><select id="b"></select><div class="rent"><label for="rb">Place B: monthly rent (optional)</label><input id="rb" type="number" inputmode="numeric" min="0" step="50" placeholder="e.g. 2100"></div></div>
 </div>
 <p id="status" class="sub" role="status">Loading the latest data...</p>
 <div id="cards" class="cards" aria-live="polite"></div>
 <div id="verdict" hidden></div>
+
+<details class="all"><summary>See all stations, ranked by delay minutes</summary>
+<label for="q">Find a station</label><input id="q" type="search" placeholder="Type a station name" autocomplete="off">
+<p class="sub">Select a row to use it as Place A.</p>
+<table><thead><tr><th>#</th><th>Station</th><th>Delay min, 12 mo</th><th>Trend</th></tr></thead><tbody id="tb"></tbody></table></details>
 
 <div class="note">
 <p><strong>Read this first.</strong> These are minutes that trains were held up at or near a station, as logged by the TTC. They do not count how many riders were affected, and they are not adjusted for how busy a station is. Large interchanges tend to log more delays simply because more happens there. Use this as one input next to your own commute.</p>
@@ -103,9 +125,28 @@ a{color:#a31a11}
     if(a&&b&&a!==b){
       var hi=a.cur>=b.cur?a:b, lo=hi===a?b:a, r=lo.cur?hi.cur/lo.cur:0;
       v.textContent=r>=1.25?hi.name+' logged about '+r.toFixed(1)+' times the delay minutes of '+lo.name+' over the last 12 months ('+fmt(hi.cur)+' against '+fmt(lo.cur)+').':'The two stations logged similar delay minutes over the last 12 months ('+fmt(a.cur)+' at '+a.name+' and '+fmt(b.cur)+' at '+b.name+').';
+      var ra=+$('ra').value, rb=+$('rb').value;
+      if(ra>0&&rb>0&&ra!==rb){
+        var cheap=ra<rb?a:b, dear=cheap===a?b:a, gap=Math.abs(ra-rb);
+        var line='<p><strong>'+cheap.name+' is $'+fmt(gap)+' a month cheaper</strong> ($'+fmt(gap*12)+' a year).</p>';
+        var worse=cheap.cur>dear.cur*1.25;
+        line+='<p>'+(worse?'Its station logged '+(cheap.cur/dear.cur).toFixed(1)+' times the delay minutes of '+dear.name+'. Weigh the saving against how often you would use that line.':'Its station does not log notably more delay minutes than '+dear.name+', so the saving does not come with a worse delay record.')+'</p>';
+        v.innerHTML=line+'<p class="sub">'+v.textContent+'</p>';
+      }
       v.hidden=false;
     }
-    history.replaceState(null,'','#'+encodeURIComponent($('a').value)+(b?'/'+encodeURIComponent(b.name):''));
+    history.replaceState(null,'','#'+encodeURIComponent($('a').value)+(b?'/'+encodeURIComponent(b.name):'')+(($('ra').value||$('rb').value)?'?'+$('ra').value+','+$('rb').value:''));
+    table();
+  }
+  function table(){
+    var q=$('q').value.trim().toLowerCase(), tb=$('tb'); tb.replaceChildren();
+    data.filter(function(d){return !q||d.name.toLowerCase().indexOf(q)>-1;}).forEach(function(d){
+      var tr=document.createElement('tr'); tr.className='pickable'; tr.tabIndex=0;
+      tr.innerHTML='<td></td><td></td><td></td><td></td>'; var c=tr.children;
+      c[0].textContent=d.rank; c[1].textContent=d.name; c[2].textContent=fmt(d.cur); c[3].textContent=d.prev?(d.cur>=d.prev?'+':'')+Math.round(100*(d.cur-d.prev)/d.prev)+'%':'n/a';
+      var go=function(){$('a').value=d.name; render(); window.scrollTo({top:0,behavior:'smooth'});};
+      tr.onclick=go; tr.onkeydown=function(e){if(e.key==='Enter')go();}; tb.append(tr);
+    });
   }
   function fill(sel,optional){
     sel.innerHTML=''; var o=document.createElement('option'); o.value=''; o.textContent=optional?'None':'Choose a station'; sel.append(o);
@@ -113,10 +154,10 @@ a{color:#a31a11}
   }
   fetch('../dashboard_data.json',{cache:'no-cache'}).then(function(r){if(!r.ok) throw 0; return r.json();}).then(function(raw){
     build(raw); fill($('a'),false); fill($('b'),true);
-    var h=decodeURIComponent(location.hash.slice(1)).split('/'); if(h[0]) $('a').value=h[0]; if(h[1]) $('b').value=h[1];
+    var hp=location.hash.slice(1).split('?'); if(hp[1]){var rr=hp[1].split(','); $('ra').value=rr[0]||''; $('rb').value=rr[1]||'';} var h=decodeURIComponent(hp[0]).split('/'); if(h[0]) $('a').value=h[0]; if(h[1]) $('b').value=h[1];
     $('status').textContent=data.length+' stations. Pick one or two.';
     var t=new Date(raw.asof+'T12:00:00'); $('asof').textContent=t.toLocaleDateString('en-CA',{year:'numeric',month:'long',day:'numeric'});
-    $('a').onchange=$('b').onchange=render; render();
+    $('a').onchange=$('b').onchange=$('ra').oninput=$('rb').oninput=render; $('q').oninput=table; render();
   }).catch(function(){ $('status').textContent='The data could not be loaded. Refresh the page, or open the full dashboard.'; });
 })();
 </script>
